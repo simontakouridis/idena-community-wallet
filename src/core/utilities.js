@@ -17,8 +17,17 @@ export const setAuthLocalStorage = (tokens, user) => {
   }
 };
 
+export const removeAuthLocalStorage = () => {
+  localStorage.removeItem('tokens');
+  localStorage.removeItem('user');
+};
+
 export const getExpiresCurrentUnixMilli = expires => {
   const expiresUnixMilli = new Date(expires).getTime();
   const currentUnixMilli = new Date().getTime();
   return { expiresUnixMilli, currentUnixMilli };
+};
+
+export const truncateAddress = address => {
+  return `${address.slice(0, 4)}...${address.slice(-2)}`;
 };

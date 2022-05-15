@@ -1,8 +1,8 @@
 import { call, put, takeLatest } from 'redux-saga/effects';
 import { sliceName as generalSliceName } from './reducer';
 import { actionNames } from './constants';
-import { idenaAuthTokenInit, getTokens, logout } from './async';
-import { getAuthLocalStorage, setAuthLocalStorage } from './utilities';
+import { idenaAuthTokenInit, getTokens, logout, getUsers } from './async';
+import { getAuthLocalStorage, setAuthLocalStorage, removeAuthLocalStorage } from './utilities';
 
 function* processLogin({ payload: idenaAuthToken }) {
   try {
@@ -18,11 +18,11 @@ function* processLogin({ payload: idenaAuthToken }) {
 function* processlogout() {
   try {
     const { tokens } = getAuthLocalStorage();
+    removeAuthLocalStorage();
     if (!tokens?.refresh?.token) {
       throw new Error('Refresh Token missing with logout');
     }
     yield call(logout, tokens.refresh.token);
-    setAuthLocalStorage('', '');
     yield put({ type: actionNames[generalSliceName].updateTokensSecured, payload: false });
   } catch (e) {
     console.error(e);
@@ -43,10 +43,23 @@ function* refreshTokens() {
   }
 }
 
+function* getData() {
+  try {
+    const users = yield call(getUsers);
+    if (!users) {
+      throw new Error('Missing users data');
+    }
+    yield put({ type: actionNames[generalSliceName].updateData, payload: { users } });
+  } catch (e) {
+    console.error(e);
+  }
+}
+
 function* appRootSaga() {
   yield takeLatest(actionNames.processLogin, processLogin);
   yield takeLatest(actionNames.processlogout, processlogout);
   yield takeLatest(actionNames.refreshTokens, refreshTokens);
+  yield takeLatest(actionNames.getData, getData);
 }
 
 export default appRootSaga;

@@ -22,10 +22,13 @@ export const actionNames = {
   processLogin: 'processLogin',
   processlogout: 'processlogout',
   refreshTokens: 'refreshTokens',
+  getData: 'getData',
   // General Slice
   [generalSliceName]: {
     updateTokensSecured: generalSliceName + '/updateTokensSecured',
     updateUser: generalSliceName + '/updateUser',
-    error: generalSliceName + '/error'
+    error: generalSliceName + '/error',
+    updateData: generalSliceName + '/updateData',
+    clearData: generalSliceName + '/clearData'
   }
 };

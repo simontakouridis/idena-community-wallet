@@ -7,7 +7,8 @@ const generalSlice = createSlice({
   initialState: {
     tokensSecured: false,
     user: null,
-    error: ''
+    error: '',
+    data: {}
   },
   reducers: {
     updateTokensSecured: (state, action) => {
@@ -18,12 +19,20 @@ const generalSlice = createSlice({
     },
     error: (state, action) => {
       state.error = action.payload;
+    },
+    updateData: (state, action) => {
+      if (action.payload?.users) {
+        state.data.users = action.payload.users;
+      }
+    },
+    clearData: state => {
+      state.data = {};
     }
   }
 });
 
 const { actions, reducer } = generalSlice;
 
-export const { updateTokensSecured, updateUser, error } = actions;
+export const { updateTokensSecured, updateUser, error, updateData, clearData } = actions;
 
 export default reducer;
