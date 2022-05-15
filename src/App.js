@@ -22,8 +22,8 @@ function App() {
     if (tokens) {
       const { expiresUnixMilli, currentUnixMilli } = getExpiresCurrentUnixMilli(tokens.refresh.expires);
       if (expiresUnixMilli - 10000 > currentUnixMilli) {
-        dispatch({ type: actionNames.refreshTokens });
         dispatch({ type: actionNames[generalSliceName].updateTokensSecured, payload: true });
+        dispatch({ type: actionNames.refreshTokens });
         return;
       }
     }
