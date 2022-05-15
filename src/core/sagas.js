@@ -23,10 +23,11 @@ function* processlogout() {
       throw new Error('Refresh Token missing with logout');
     }
     yield call(logout, tokens.refresh.token);
-    yield put({ type: actionNames[generalSliceName].updateTokensSecured, payload: false });
   } catch (e) {
     console.error(e);
     yield put({ type: actionNames[generalSliceName].error, payload: 'Error logging out' });
+  } finally {
+    yield put({ type: actionNames[generalSliceName].updateTokensSecured, payload: false });
   }
 }
 
@@ -39,6 +40,7 @@ function* refreshTokens() {
     const newTokens = yield call(getTokens, tokens.refresh.token);
     setAuthLocalStorage(JSON.stringify(newTokens), null);
   } catch (e) {
+    yield put({ type: actionNames[generalSliceName].updateTokensSecured, payload: false });
     console.error(e);
   }
 }
