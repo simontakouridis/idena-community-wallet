@@ -18,8 +18,8 @@ export const setAuthLocalStorage = (tokens, user) => {
 };
 
 export const removeAuthLocalStorage = () => {
-  localStorage.removeItem('tokens');
-  localStorage.removeItem('user');
+  localStorage.removeItem(appConfigurations.localStorageTokensKey);
+  localStorage.removeItem(appConfigurations.localStorageUserKey);
 };
 
 export const getExpiresCurrentUnixMilli = expires => {
