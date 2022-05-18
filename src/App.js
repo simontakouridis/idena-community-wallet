@@ -1,17 +1,21 @@
 import React, { useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { useDispatch, useSelector } from 'react-redux';
 import { ToastContainer, toast } from 'react-toastify';
 import { sliceName as generalSliceName } from './core/reducer';
 import { actionNames } from './core/constants';
-import { getAuthLocalStorage, removeAuthLocalStorage, getExpiresCurrentUnixMilli, truncateAddress } from './core/utilities';
+import { getAuthLocalStorage, removeAuthLocalStorage, getExpiresCurrentUnixMilli } from './core/utilities';
 import { appConfigurations } from './core/constants';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import SignIn from './components/SignIn';
+import Home from './components/Home';
+import Delegates from './components/Delegates';
+import Proposals from './components/Proposals';
+import Wallet from './components/Wallet';
 import './App.css';
 import 'react-toastify/dist/ReactToastify.css';
+
 function App() {
   const dispatch = useDispatch();
-  const user = useSelector(state => state.general.user);
-  const users = useSelector(state => state.general.data.users);
   const tokensSecured = useSelector(state => state.general.tokensSecured);
   const error = useSelector(state => state.general.error);
 
@@ -58,71 +62,22 @@ function App() {
     }
   }, [error]);
 
-  const idenaSignIn = () => {
-    const token = uuidv4();
-    const params = new URLSearchParams({
-      token,
-      callback_url: encodeURIComponent(`${appConfigurations.localBaseUrl}?token=${token}`),
-      nonce_endpoint: `${appConfigurations.apiBaseUrl}/auth/start-session`,
-      authentication_endpoint: `${appConfigurations.apiBaseUrl}/auth/authenticate`,
-      favicon_url: `${appConfigurations.localBaseUrl}/favicon.ico`
-    });
-
-    window.location.href = `${appConfigurations.idenaSignInUrl}?` + params.toString();
-  };
-
-  const signOut = () => {
-    dispatch({ type: actionNames.processlogout });
-  };
-
   return (
-    <div className="App">
-      <div className="Container">
-        {user && (
-          <div>
-            <div>
-              <a href={`https://scan.idena.io/address/${user.address}`} target="_blank" rel="noreferrer">
-                <img className="UserImg" src={`https://robohash.org/${user.address}?set=set1`} />
-              </a>
-            </div>
-            <div>
-              <a href={`https://scan.idena.io/address/${user.address}`} target="_blank" rel="noreferrer">
-                {truncateAddress(user.address)}
-              </a>
-            </div>
-          </div>
-        )}
-        <div className="SignInButtonDiv">
-          {tokensSecured ? <button onClick={() => signOut()}>Sign Out</button> : <button onClick={() => idenaSignIn()}>Sign in with Idena</button>}
+    <BrowserRouter>
+      <div className="App">
+        <div className="Container">
+          <SignIn />
+          <Link to="/">Home</Link> | <Link to="/delegates">Delegates</Link> | <Link to="/proposals">Proposals</Link> | <Link to="/wallet">Wallet</Link>
+          <Routes>
+            <Route path="/delegates" element={<Delegates />} />
+            <Route path="/proposals" element={<Proposals />} />
+            <Route path="/wallet" element={<Wallet />} />
+            <Route path="/" element={<Home />} />
+          </Routes>
         </div>
-        {users && (
-          <div className="UsersDiv">
-            <table>
-              <thead>
-                <tr>
-                  <th colSpan="2">All users:</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map(user => (
-                  <tr key={user.address}>
-                    <td>
-                      <img className="UsersImg" src={`https://robohash.org/${user.address}?set=set1`} />
-                    </td>
-                    <td style={{ paddingTop: '10px' }}>
-                      <a href={`https://scan.idena.io/address/${user.address}`} target="_blank" rel="noreferrer">
-                        {truncateAddress(user.address)}
-                      </a>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <ToastContainer />
       </div>
-      <ToastContainer />
-    </div>
+    </BrowserRouter>
   );
 }
 
