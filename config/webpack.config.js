@@ -304,7 +304,11 @@ module.exports = function (webpackEnv) {
           babelRuntimeEntryHelpers,
           babelRuntimeRegenerator
         ])
-      ]
+      ],
+      fallback: {
+        stream: require.resolve('stream-browserify'),
+        buffer: require.resolve('buffer')
+      }
     },
     module: {
       strictExportPresence: true,
@@ -685,7 +689,15 @@ module.exports = function (webpackEnv) {
               })
             }
           }
-        })
+        }),
+      // Work around for Buffer is undefined:
+      // https://github.com/webpack/changelog-v5/issues/10
+      new webpack.ProvidePlugin({
+        Buffer: ['buffer', 'Buffer']
+      }),
+      new webpack.ProvidePlugin({
+        process: 'process/browser'
+      })
     ].filter(Boolean),
     // Turn off performance processing because we utilize
     // our own hints via the FileSizeReporter

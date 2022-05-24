@@ -5,9 +5,10 @@ import { sliceName as generalSliceName } from './core/reducer';
 import { actionNames } from './core/constants';
 import { getAuthLocalStorage, removeAuthLocalStorage, getExpiresCurrentUnixMilli } from './core/utilities';
 import { appConfigurations } from './core/constants';
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter, useRoutes, Link } from 'react-router-dom';
 import SignIn from './components/SignIn';
 import Home from './components/Home';
+import CreateWallet from './components/CreateWallet';
 import Delegates from './components/Delegates';
 import Proposals from './components/Proposals';
 import Wallet from './components/Wallet';
@@ -18,6 +19,16 @@ function App() {
   const dispatch = useDispatch();
   const tokensSecured = useSelector(state => state.general.tokensSecured);
   const error = useSelector(state => state.general.error);
+
+  const Routes = () =>
+    useRoutes([
+      { path: '/create-wallet/creating', element: <CreateWallet /> },
+      { path: '/create-wallet', element: <CreateWallet /> },
+      { path: '/delegates', element: <Delegates /> },
+      { path: '/proposals', element: <Proposals /> },
+      { path: '/wallet', element: <Wallet /> },
+      { path: '/', element: <Home /> }
+    ]);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -68,12 +79,7 @@ function App() {
         <div className="Container">
           <SignIn />
           <Link to="/">Home</Link> | <Link to="/delegates">Delegates</Link> | <Link to="/proposals">Proposals</Link> | <Link to="/wallet">Wallet</Link>
-          <Routes>
-            <Route path="/delegates" element={<Delegates />} />
-            <Route path="/proposals" element={<Proposals />} />
-            <Route path="/wallet" element={<Wallet />} />
-            <Route path="/" element={<Home />} />
-          </Routes>
+          <Routes />
         </div>
         <ToastContainer />
       </div>

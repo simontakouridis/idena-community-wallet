@@ -8,7 +8,12 @@ const generalSlice = createSlice({
     tokensSecured: false,
     user: null,
     error: '',
-    data: {}
+    data: {},
+    loaders: {
+      creatingWallet: false
+    },
+    walletCreating: null,
+    walletsCreated: []
   },
   reducers: {
     updateTokensSecured: (state, action) => {
@@ -27,12 +32,21 @@ const generalSlice = createSlice({
     },
     clearData: state => {
       state.data = {};
+    },
+    updateLoader: (state, action) => {
+      state.loaders[action.payload.loader] = action.payload.loading;
+    },
+    updateWalletCreating: (state, action) => {
+      state.walletCreating = action.payload;
+    },
+    updateWalletsCreated: (state, action) => {
+      state.walletsCreated = action.payload;
     }
   }
 });
 
 const { actions, reducer } = generalSlice;
 
-export const { updateTokensSecured, updateUser, error, updateData, clearData } = actions;
+export const { updateTokensSecured, updateUser, error, updateData, clearData, updateLoader, updateWalletCreating, updateWalletsCreated } = actions;
 
 export default reducer;
