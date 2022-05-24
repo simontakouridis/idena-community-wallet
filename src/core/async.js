@@ -42,6 +42,15 @@ export function* getAddress(address) {
   return response.data;
 }
 
+export function* rpcGetBalance(address) {
+  const body = { jsonrpc: '2.0', key: appConfigurations.idenaRestrictedNodeKey, id: 1, method: 'dna_getBalance', params: [address] };
+  const response = yield call(axios.post, appConfigurations.idenaRestrictedNodeUrl, body);
+  if (response?.status !== 200 || !response?.data?.result) {
+    throw new Error('Error getting rpc balance data');
+  }
+  return response.data.result;
+}
+
 export function* getLastEpoch() {
   const response = yield call(axios.get, `${appConfigurations.idenaApiUrl}/Epoch/Last`);
   if (response?.status !== 200 || !response?.data?.result) {

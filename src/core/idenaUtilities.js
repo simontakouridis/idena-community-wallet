@@ -171,5 +171,6 @@ export function getMultisigPayload() {
     { index: 1, format: 'byte', value: '3' }
   ];
   const argSlice = argsToSlice(args);
-  return new DeployContractAttachment(0x05, argSlice).toBytes();
+  const codeHashBytes = toBytes({ index: 0, format: 'byte', value: '5' });
+  return new DeployContractAttachment(codeHashBytes, argSlice);
 }

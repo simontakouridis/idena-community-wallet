@@ -6,7 +6,7 @@ import {
   getTokens,
   logout,
   getUsers,
-  getAddress,
+  rpcGetBalance,
   getLastEpoch,
   getTransaction,
   getContract,
@@ -75,21 +75,27 @@ function* getData() {
 
 function* createMultisigWallet(action) {
   try {
-    const { payload: user } = action;
-    const addressData = yield call(getAddress, user.address);
-    const nonce = addressData?.result?.txCount ?? 0;
+    const {
+      payload: { user }
+    } = action;
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'creatingWallet', loading: true } });
+    const balanceData = yield call(rpcGetBalance, user.address);
+    const nonce = balanceData.nonce + 1;
     const epochData = yield call(getLastEpoch);
     const epoch = epochData.epoch;
+    const multisigPayload = getMultisigPayload();
+    const tx = new Transaction(nonce, epoch, 0xf, '', 5 * 10 ** 18, 0.1 * 10 ** 18, 0, multisigPayload.toBytes());
     const tx = new Transaction(nonce, epoch, 3, '0x0000000000000000000000000000000000000000', 1 * 10 ** 18, 2 * 10 ** 18, 0, getMultisigPayload());
     const unsignedRawTx = '0x' + tx.toHex();
     const params = new URLSearchParams({
       tx: unsignedRawTx,
       callback_format: 'html',
-      callback_url: encodeURIComponent(`${appConfigurations.localBaseUrl}/creating`)
+      callback_url: encodeURIComponent(`${appConfigurations.localBaseUrl}/create-wallet/creating`)
     });
     window.location.href = `${appConfigurations.idenaRawTxUrl}?` + params.toString();
   } catch (e) {
     console.error(e);
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'creatingWallet', loading: false } });
   }
 }
 

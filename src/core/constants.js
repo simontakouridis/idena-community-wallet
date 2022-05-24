@@ -10,6 +10,8 @@ export const appConfigurations = {
   idenaSignInUrl: process.env.REACT_APP_IDENA_SIGN_IN_URL || 'https://app.idena.io/dna/signin',
   idenaRawTxUrl: process.env.REACT_APP_IDENA_RAW_TX_URL || 'https://app.idena.io/dna/raw',
   idenaApiUrl: process.env.REACT_APP_IDENA_API_URL || 'https://api.idena.io/api',
+  idenaRestrictedNodeUrl: process.env.REACT_APP_IDENA_RESTRICTED_NODE_URL || 'https://restricted.idena.io',
+  idenaRestrictedNodeKey: process.env.REACT_APP_IDENA_RESTRICTED_NODE_KEY || 'node-key',
   refreshExpirationDays: process.env.REACT_APP_JWT_REFRESH_EXPIRATION_DAYS || 30,
   refreshTokensMinutes: process.env.REACT_APP_JWT_REFRESH_MINUTES || 10,
   localStorageTokensKey: 'tokens',
