@@ -9,7 +9,9 @@ const generalSlice = createSlice({
     user: null,
     data: {},
     loaders: {
-      creatingWallet: false
+      creatingWallet: false,
+      deletingWallet: false,
+      addingSigner: false
     },
     walletCreating: null,
     walletsCreated: []

@@ -13,12 +13,13 @@ import {
   getContract,
   getMultisigContract,
   postNewWallet,
-  getWallets
-} from './async';
+  getWallets,
+  deleteWallet
+} from './api';
 import { getAuthLocalStorage, setAuthLocalStorage, removeAuthLocalStorage } from './utilities';
 import { appConfigurations } from './../core/constants';
-import { getMultisigPayload } from './../core/idenaUtilities';
-import { Transaction } from './../core/transaction';
+import { getDeployMultisigPayload, getAddSignerPayload } from './../core/idenaUtilities';
+import { Transaction } from './idenaTransaction';
 
 function* processLogin({ payload: idenaAuthToken }) {
   try {
@@ -80,6 +81,9 @@ function* createMultisigWallet(action) {
       payload: { user }
     } = action;
     yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'creatingWallet', loading: true } });
+    const { nonce, epoch } = yield call(getNonceAndEpoch, user.address);
+    const multisigPayload = getDeployMultisigPayload('5', '3');
+    const tx = new Transaction(nonce, epoch, 0xf, '', 2 * 10 ** 18, 0.1 * 10 ** 18, 0, multisigPayload.toBytes());
     const balanceData = yield call(rpcGetBalance, user.address);
     const nonce = balanceData.nonce + 1;
     const epochData = yield call(getLastEpoch);
@@ -134,12 +138,12 @@ function* creatingMultisigWallet(action) {
     }
 
     const multisigContractData = yield call(getMultisigContract, contract);
-    if (multisigContractData.maxVotes !== 0 || multisigContractData.maxVotes !== 0 || multisigContractData.signers.length !== 0) {
+    if (multisigContractData.minVotes !== 3 || multisigContractData.maxVotes !== 5 || multisigContractData.signers) {
       throw new Error('Data inconsistency with new multisig contract');
     }
 
-    const newWallet = yield call(postNewWallet, contract);
-    yield put({ type: actionNames[generalSliceName].updateCreatingWallet, payload: newWallet });
+    const newWallet = yield call(postNewWallet, contract, user.address);
+    yield put({ type: actionNames[generalSliceName].updateWalletCreating, payload: newWallet });
   } catch (e) {
     console.error(e);
     toast('Error creating wallet');
@@ -166,6 +170,53 @@ function* getUserWallets(action) {
   }
 }
 
+function* deleteWalletCreating(action) {
+  try {
+    const {
+      payload: { walletCreating }
+    } = action;
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'deletingWallet', loading: true } });
+    yield call(deleteWallet, walletCreating);
+    yield put({ type: actionNames[generalSliceName].updateWalletCreating, payload: null });
+  } catch (e) {
+    console.error(e);
+  } finally {
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'deletingWallet', loading: false } });
+  }
+}
+
+function* addSignerToWalletCreating(action) {
+  try {
+    const {
+      payload: { signer, user, walletCreating }
+    } = action;
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'addingSigner', loading: true } });
+    const { nonce, epoch } = yield call(getNonceAndEpoch, user.address);
+    const addSignerPayload = getAddSignerPayload(signer);
+    const tx = new Transaction(nonce, epoch, 0x10, walletCreating.address, 2 * 10 ** 18, 0.1 * 10 ** 18, 0, addSignerPayload.toBytes());
+    const unsignedRawTx = '0x' + tx.toHex();
+    const params = new URLSearchParams({
+      tx: unsignedRawTx,
+      callback_format: 'html',
+      callback_url: encodeURIComponent(`${appConfigurations.localBaseUrl}/create-wallet/adding`)
+    });
+    window.location.href = `${appConfigurations.idenaRawTxUrl}?` + params.toString();
+  } catch (e) {
+    console.error(e);
+  } finally {
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'addingSigner', loading: false } });
+  }
+}
+
+function* getNonceAndEpoch(userAddress) {
+  const balanceData = yield call(rpcGetBalance, userAddress);
+  const nonce = balanceData.nonce + 1;
+  const epochData = yield call(getLastEpoch);
+  const epoch = epochData.epoch;
+
+  return { nonce, epoch };
+}
+
 function* appRootSaga() {
   yield takeLatest(actionNames.processLogin, processLogin);
   yield takeLatest(actionNames.processlogout, processlogout);
@@ -175,6 +226,9 @@ function* appRootSaga() {
 
   yield takeLeading(actionNames.getUserWallets, getUserWallets);
   yield takeLeading(actionNames.creatingMultisigWallet, creatingMultisigWallet);
+
+  yield takeLeading(actionNames.deleteWalletCreating, deleteWalletCreating);
+  yield takeLeading(actionNames.addSignerToWalletCreating, addSignerToWalletCreating);
 }
 
 export default appRootSaga;

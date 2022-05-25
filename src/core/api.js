@@ -83,8 +83,8 @@ export function* getMultisigContract(contract) {
   return response.data.result;
 }
 
-export function* postNewWallet(contract) {
-  const response = yield call(axios.post, `${appConfigurations.apiBaseUrl}/governance/create-wallet`, { address: contract });
+export function* postNewWallet(address, author) {
+  const response = yield call(axios.post, `${appConfigurations.apiBaseUrl}/governance/create-wallet`, { address, author });
   if (response?.status !== 201 || !response?.data) {
     throw new Error('Error posting new wallet');
   }
@@ -95,6 +95,14 @@ export function* getWallets(params) {
   const loginResponse = yield call(axios.get, `${appConfigurations.apiBaseUrl}/governance/wallets`, { params });
   if (loginResponse?.status !== 200 || !loginResponse?.data?.results) {
     throw new Error('Error getting wallets');
+  }
+  return loginResponse.data.results;
+}
+
+export function* deleteWallet(walletCreating) {
+  const loginResponse = yield call(axios.delete, `${appConfigurations.apiBaseUrl}/governance/wallets/${walletCreating.id}`);
+  if (loginResponse?.status !== 200) {
+    throw new Error('Error deleting wallet');
   }
   return loginResponse.data.results;
 }

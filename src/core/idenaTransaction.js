@@ -1,7 +1,7 @@
 import sha3 from 'js-sha3';
 import secp256k1 from 'secp256k1';
 import { toBuffer, hexToUint8Array, bufferToInt, toHexString } from './idenaUtilities';
-import messages from './proto/models_pb.js';
+import messages from './idenaProto/models_pb.js';
 
 export class Transaction {
   constructor(nonce, epoch, type, to, amount, maxFee, tips, payload) {

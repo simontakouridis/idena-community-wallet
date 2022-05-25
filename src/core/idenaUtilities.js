@@ -1,7 +1,7 @@
 import BN from 'bn.js';
 import Decimal from 'decimal.js';
 
-const messages = require('./proto/models_pb.js');
+const messages = require('./idenaProto/models_pb.js');
 const DNA_BASE = '1000000000000000000';
 
 /** Check if a string is prefixed by 0x */
@@ -165,12 +165,43 @@ export class DeployContractAttachment {
   }
 }
 
-export function getMultisigPayload() {
+export class CallContractAttachment {
+  constructor(method, args) {
+    this.method = method;
+    this.args = args;
+  }
+
+  fromBytes(bytes) {
+    const protoAttachment = messages.ProtoCallContractAttachment.deserializeBinary(bytes);
+
+    this.method = protoAttachment.getMethod();
+    this.args = protoAttachment.getArgsList();
+
+    return this;
+  }
+
+  toBytes() {
+    const data = new messages.ProtoCallContractAttachment();
+    data.setMethod(this.method);
+    for (let i = 0; i < this.args.length; i += 1) {
+      data.addArgs(new Uint8Array(this.args[i]));
+    }
+    return data.serializeBinary();
+  }
+}
+
+export function getDeployMultisigPayload(maxVotes, minVotes) {
   const args = [
-    { index: 0, format: 'byte', value: '5' },
-    { index: 1, format: 'byte', value: '3' }
+    { index: 0, format: 'byte', value: maxVotes },
+    { index: 1, format: 'byte', value: minVotes }
   ];
   const argSlice = argsToSlice(args);
   const codeHashBytes = toBytes({ index: 0, format: 'byte', value: '5' });
   return new DeployContractAttachment(codeHashBytes, argSlice);
+}
+
+export function getAddSignerPayload(address) {
+  const args = [{ index: 0, format: 'hex', value: address }];
+  const argSlice = argsToSlice(args);
+  return new CallContractAttachment('add', argSlice);
 }

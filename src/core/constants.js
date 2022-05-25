@@ -29,6 +29,8 @@ export const actionNames = {
   getData: 'getData',
   createMultisigWallet: 'createMultisigWallet',
   creatingMultisigWallet: 'creatingMultisigWallet',
+  deleteWalletCreating: 'deleteWalletCreating',
+  addSignerToWalletCreating: 'addSignerToWalletCreating',
   getUserWallets: 'getUserWallets',
   // General Slice
   [generalSliceName]: {
