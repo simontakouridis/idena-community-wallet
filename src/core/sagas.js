@@ -1,6 +1,7 @@
 import { call, put, delay, takeLeading, takeLatest } from 'redux-saga/effects';
 import { sliceName as generalSliceName } from './reducer';
 import { actionNames } from './constants';
+import { toast } from 'react-toastify';
 import {
   idenaAuthTokenInit,
   getTokens,
@@ -26,7 +27,7 @@ function* processLogin({ payload: idenaAuthToken }) {
     yield put({ type: actionNames[generalSliceName].updateTokensSecured, payload: true });
   } catch (e) {
     console.error(e);
-    yield put({ type: actionNames[generalSliceName].error, payload: 'Error logging in' });
+    toast('Error logging in');
   }
 }
 
@@ -40,7 +41,7 @@ function* processlogout() {
     yield call(logout, tokens.refresh.token);
   } catch (e) {
     console.error(e);
-    yield put({ type: actionNames[generalSliceName].error, payload: 'Error logging out' });
+    toast('Error logging out');
   } finally {
     yield put({ type: actionNames[generalSliceName].updateTokensSecured, payload: false });
   }
@@ -141,7 +142,7 @@ function* creatingMultisigWallet(action) {
     yield put({ type: actionNames[generalSliceName].updateCreatingWallet, payload: newWallet });
   } catch (e) {
     console.error(e);
-    yield put({ type: actionNames[generalSliceName].error, payload: 'Error creating wallet' });
+    toast('Error creating wallet');
   } finally {
     yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'creatingWallet', loading: false } });
   }
@@ -161,7 +162,7 @@ function* getUserWallets(action) {
     yield put({ type: actionNames[generalSliceName].updateWalletsCreated, payload: walletsCreated });
   } catch (e) {
     console.error(e);
-    yield put({ type: actionNames[generalSliceName].error, payload: 'Error getting user wallets' });
+    toast('Error getting user wallets');
   }
 }
 

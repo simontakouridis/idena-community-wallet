@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import { sliceName as generalSliceName } from './core/reducer';
 import { actionNames } from './core/constants';
 import { getAuthLocalStorage, removeAuthLocalStorage, getExpiresCurrentUnixMilli } from './core/utilities';
@@ -18,7 +18,6 @@ import 'react-toastify/dist/ReactToastify.css';
 function App() {
   const dispatch = useDispatch();
   const tokensSecured = useSelector(state => state.general.tokensSecured);
-  const error = useSelector(state => state.general.error);
 
   const Routes = () =>
     useRoutes([
@@ -66,12 +65,6 @@ function App() {
     }
     return () => intervalId && clearInterval(intervalId);
   }, [tokensSecured]);
-
-  useEffect(() => {
-    if (error) {
-      toast(error);
-    }
-  }, [error]);
 
   return (
     <BrowserRouter>

@@ -12,16 +12,14 @@ function CreateWallet() {
   const walletsCreated = useSelector(state => state.general.walletsCreated);
 
   useEffect(() => {
-    dispatch({ type: actionNames.getUserWallets, payload: { user } });
-
-    if (location.pathname === '/create-wallet/creating') {
+    if (user && location.pathname === '/create-wallet/creating') {
       const urlParams = new URLSearchParams(window.location.search);
       const tx = urlParams.get('tx');
       if (tx) {
         dispatch({ type: actionNames.creatingMultisigWallet, payload: { tx, user } });
       }
     }
-  }, []);
+  }, [user]);
 
   const createMultisigWallet = async () => {
     dispatch({ type: actionNames.createMultisigWallet, payload: { user } });
