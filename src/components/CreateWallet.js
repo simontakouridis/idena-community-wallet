@@ -12,7 +12,11 @@ function CreateWallet() {
   const walletsCreated = useSelector(state => state.general.walletsCreated);
 
   useEffect(() => {
-    if (user && location.pathname === '/create-wallet/creating') {
+    if (!user) {
+      return;
+    }
+    dispatch({ type: actionNames.getUserWallets, payload: { user } });
+    if (location.pathname === '/create-wallet/creating') {
       const urlParams = new URLSearchParams(window.location.search);
       const tx = urlParams.get('tx');
       if (tx) {
