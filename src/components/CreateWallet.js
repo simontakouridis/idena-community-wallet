@@ -10,7 +10,7 @@ function CreateWallet() {
   const user = useSelector(state => state.general.user);
   const isCreatingWallet = useSelector(state => state.general.loaders.creatingWallet);
   const isDeletingWallet = useSelector(state => state.general.loaders.deletingWallet);
-  const walletCreating = useSelector(state => state.general.walletCreating);
+  const draftWallet = useSelector(state => state.general.draftWallet);
   const walletsCreated = useSelector(state => state.general.walletsCreated);
 
   const [signer, setSigner] = useState('');
@@ -40,35 +40,35 @@ function CreateWallet() {
     dispatch({ type: actionNames.createMultisigWallet, payload: { user } });
   };
 
-  const deleteWalletCreating = async () => {
-    dispatch({ type: actionNames.deleteWalletCreating, payload: { walletCreating } });
+  const deleteDraftWallet = async () => {
+    dispatch({ type: actionNames.deleteDraftWallet, payload: { draftWallet } });
   };
 
-  const addSignerToWalletCreating = async () => {
+  const addSignerToDraftWallet = async () => {
     if (!isValidAddress(signer)) {
       alert('Not a valid address!');
       return;
     }
-    dispatch({ type: actionNames.addSignerToWalletCreating, payload: { signer, user, walletCreating } });
+    dispatch({ type: actionNames.addSignerToDraftWallet, payload: { signer, user, draftWallet } });
   };
 
   return (
     <>
       <h2>CreateWallet</h2>
-      <button onClick={() => createMultisigWallet()} disabled={isCreatingWallet || walletCreating}>
+      <button onClick={() => createMultisigWallet()} disabled={isCreatingWallet || draftWallet}>
         Create New Multisig Wallet
       </button>
       <div>isCreatingWallet: {isCreatingWallet ? 'true' : 'false'}</div>
       <br />
-      <div>Past Wallets Created: {JSON.stringify(walletsCreated)}</div>
+      <div>Wallets Created: {JSON.stringify(walletsCreated)}</div>
       <br />
-      <div>Current Wallet Creation: {JSON.stringify(walletCreating)}</div>
-      {walletCreating && (
+      <div>Draft Wallet: {JSON.stringify(draftWallet)}</div>
+      {draftWallet && (
         <>
-          <button onClick={() => deleteWalletCreating()} disabled={isDeletingWallet}>
+          <button onClick={() => deleteDraftWallet()} disabled={isDeletingWallet}>
             Delete
           </button>
-          <button onClick={() => addSignerToWalletCreating()}>Add Signer</button>
+          <button onClick={() => addSignerToDraftWallet()}>Add Signer</button>
           <input value={signer} onChange={e => setSigner(e.target.value)} />
         </>
       )}

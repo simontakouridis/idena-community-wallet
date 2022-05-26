@@ -29,8 +29,8 @@ export const actionNames = {
   getData: 'getData',
   createMultisigWallet: 'createMultisigWallet',
   creatingMultisigWallet: 'creatingMultisigWallet',
-  deleteWalletCreating: 'deleteWalletCreating',
-  addSignerToWalletCreating: 'addSignerToWalletCreating',
+  deleteDraftWallet: 'deleteDraftWallet',
+  addSignerToDraftWallet: 'addSignerToDraftWallet',
   addingSignerToMultisigWallet: 'addingSignerToMultisigWallet',
   getUserWallets: 'getUserWallets',
   // General Slice
@@ -41,8 +41,8 @@ export const actionNames = {
     updateData: generalSliceName + '/updateData',
     clearData: generalSliceName + '/clearData',
     updateLoader: generalSliceName + '/updateLoader',
-    updateWalletCreating: generalSliceName + '/updateWalletCreating',
+    updateDraftWallet: generalSliceName + '/updateDraftWallet',
     updateWalletsCreated: generalSliceName + '/updateWalletsCreated',
-    addNewSignerToWalletCreating: generalSliceName + '/addNewSignerToWalletCreating'
+    addNewSignerToDraftWallet: generalSliceName + '/addNewSignerToDraftWallet'
   }
 };

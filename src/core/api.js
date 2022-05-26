@@ -83,10 +83,10 @@ export function* getMultisigContract(contract) {
   return response.data.result;
 }
 
-export function* postNewWallet(address) {
-  const response = yield call(axios.post, `${appConfigurations.apiBaseUrl}/governance/create-wallet`, { address });
+export function* postNewDraftWallet(address) {
+  const response = yield call(axios.post, `${appConfigurations.apiBaseUrl}/governance/create-draft-wallet`, { address });
   if (response?.status !== 201 || !response?.data) {
-    throw new Error('Error posting new wallet');
+    throw new Error('Error posting new draft wallet');
   }
   return response.data;
 }
@@ -99,6 +99,14 @@ export function* postNewSigner(signer, contract) {
   return response.data;
 }
 
+export function* getDraftWallets(params) {
+  const loginResponse = yield call(axios.get, `${appConfigurations.apiBaseUrl}/governance/draft-wallets`, { params });
+  if (loginResponse?.status !== 200 || !loginResponse?.data?.results) {
+    throw new Error('Error getting draft wallets');
+  }
+  return loginResponse.data.results;
+}
+
 export function* getWallets(params) {
   const loginResponse = yield call(axios.get, `${appConfigurations.apiBaseUrl}/governance/wallets`, { params });
   if (loginResponse?.status !== 200 || !loginResponse?.data?.results) {
@@ -107,8 +115,8 @@ export function* getWallets(params) {
   return loginResponse.data.results;
 }
 
-export function* deleteWallet(walletCreating) {
-  const loginResponse = yield call(axios.delete, `${appConfigurations.apiBaseUrl}/governance/wallets/${walletCreating.id}`);
+export function* deleteWallet(draftWallet) {
+  const loginResponse = yield call(axios.delete, `${appConfigurations.apiBaseUrl}/governance/draft-wallets/${draftWallet.id}`);
   if (loginResponse?.status !== 200) {
     throw new Error('Error deleting wallet');
   }

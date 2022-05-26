@@ -11,8 +11,9 @@ import {
   getLastEpoch,
   getTransaction,
   getMultisigContract,
-  postNewWallet,
+  postNewDraftWallet,
   postNewSigner,
+  getDraftWallets,
   getWallets,
   deleteWallet
 } from './api';
@@ -118,11 +119,11 @@ function* creatingMultisigWallet(action) {
       throw new Error('No contract found!');
     }
 
-    const newWallet = yield call(postNewWallet, contract);
-    yield put({ type: actionNames[generalSliceName].updateWalletCreating, payload: newWallet });
+    const newDraftWallet = yield call(postNewDraftWallet, contract);
+    yield put({ type: actionNames[generalSliceName].updateDraftWallet, payload: newDraftWallet });
   } catch (e) {
     console.error(e);
-    toast('Error creating wallet');
+    toast('Error creating draft wallet');
   } finally {
     yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'creatingWallet', loading: false } });
   }
@@ -133,12 +134,10 @@ function* getUserWallets(action) {
     const {
       payload: { user }
     } = action;
+    const draftWallet = yield call(getDraftWallets, { author: user.address });
+    const walletsCreated = yield call(getWallets, { author: user.address });
 
-    const userWallets = yield call(getWallets, { author: user.address });
-    const walletCreating = userWallets.find(wallet => !wallet.round);
-    const walletsCreated = userWallets.filter(wallet => !!wallet.round);
-
-    yield put({ type: actionNames[generalSliceName].updateWalletCreating, payload: walletCreating });
+    yield put({ type: actionNames[generalSliceName].updateDraftWallet, payload: draftWallet });
     yield put({ type: actionNames[generalSliceName].updateWalletsCreated, payload: walletsCreated });
   } catch (e) {
     console.error(e);
@@ -146,14 +145,14 @@ function* getUserWallets(action) {
   }
 }
 
-function* deleteWalletCreating(action) {
+function* deleteDraftWallet(action) {
   try {
     const {
-      payload: { walletCreating }
+      payload: { draftWallet }
     } = action;
     yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'deletingWallet', loading: true } });
-    yield call(deleteWallet, walletCreating);
-    yield put({ type: actionNames[generalSliceName].updateWalletCreating, payload: null });
+    yield call(deleteWallet, draftWallet);
+    yield put({ type: actionNames[generalSliceName].updateDraftWallet, payload: null });
   } catch (e) {
     console.error(e);
   } finally {
@@ -161,14 +160,15 @@ function* deleteWalletCreating(action) {
   }
 }
 
-function* addSignerToWalletCreating(action) {
+function* addSignerToDraftWallet(action) {
   try {
     const {
-      payload: { signer, user, walletCreating }
+      payload: { signer, user, draftWallet }
     } = action;
     yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'addingSigner', loading: true } });
     const { nonce, epoch } = yield call(getNonceAndEpoch, user.address);
     const addSignerPayload = getAddSignerPayload(signer);
+    const tx = new Transaction(nonce, epoch, 0x10, draftWallet.address, 2 * 10 ** 18, 0.1 * 10 ** 18, 0, addSignerPayload.toBytes());
     const tx = new Transaction(nonce, epoch, 0x10, walletCreating.address, 2 * 10 ** 18, 0.1 * 10 ** 18, 0, addSignerPayload.toBytes());
     const unsignedRawTx = '0x' + tx.toHex();
     const params = new URLSearchParams({
@@ -176,7 +176,7 @@ function* addSignerToWalletCreating(action) {
       callback_format: 'html',
       callback_url: encodeURIComponent(`${appConfigurations.localBaseUrl}/create-wallet/adding`)
     });
-    localStorage.setItem('newSigner', JSON.stringify({ signer, contract: walletCreating.address }));
+    localStorage.setItem('newSigner', JSON.stringify({ signer, contract: draftWallet.address }));
     window.location.href = `${appConfigurations.idenaRawTxUrl}?` + params.toString();
   } catch (e) {
     localStorage.removeItem('newSigner');
@@ -204,11 +204,11 @@ function* addingSignerToMultisigWallet(action) {
     if (!multisigContractData?.signers) {
       throw new Error('Data inconsistency with new multisig contract');
     }
-    const wallets = yield call(getWallets, { address: contract });
-    if (wallets?.length !== 1 || wallets[0].signers?.length + 1 !== multisigContractData?.signers.length) {
-      throw new Error('Data inconsistency with wallet');
+    const draftWallets = yield call(getDraftWallets, { address: contract });
+    if (draftWallets?.length !== 1 || draftWallets[0].signers?.length + 1 !== multisigContractData?.signers.length) {
+      throw new Error('Data inconsistency with draft wallet');
     }
-    const remainingSigners = multisigContractData.signers.filter(signer => !wallets[0].signers.find(signer.address));
+    const remainingSigners = multisigContractData.signers.filter(signer => !draftWallets[0].signers.find(signer.address));
     if (remainingSigners.length !== 1) {
       throw new Error('More than one new signer detected');
     }
@@ -220,7 +220,7 @@ function* addingSignerToMultisigWallet(action) {
       throw new Error('Data inconsistency with new signer');
     }
     yield call(postNewSigner, newSigner, contract);
-    yield put({ type: actionNames[generalSliceName].addNewSignerToWalletCreating, payload: newSigner });
+    yield put({ type: actionNames[generalSliceName].addNewSignerToDraftWallet, payload: newSigner });
   } catch (e) {
     console.error(e);
     toast('Error adding signer');
@@ -266,8 +266,8 @@ function* appRootSaga() {
   yield takeLatest(actionNames.createMultisigWallet, createMultisigWallet);
   yield takeLeading(actionNames.getUserWallets, getUserWallets);
   yield takeLeading(actionNames.creatingMultisigWallet, creatingMultisigWallet);
-  yield takeLeading(actionNames.deleteWalletCreating, deleteWalletCreating);
-  yield takeLeading(actionNames.addSignerToWalletCreating, addSignerToWalletCreating);
+  yield takeLeading(actionNames.deleteDraftWallet, deleteDraftWallet);
+  yield takeLeading(actionNames.addSignerToDraftWallet, addSignerToDraftWallet);
   yield takeLeading(actionNames.addingSignerToMultisigWallet, addingSignerToMultisigWallet);
 }
 

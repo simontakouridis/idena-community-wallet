@@ -13,7 +13,7 @@ const generalSlice = createSlice({
       deletingWallet: false,
       addingSigner: false
     },
-    walletCreating: null,
+    draftWallet: null,
     walletsCreated: []
   },
   reducers: {
@@ -34,29 +34,21 @@ const generalSlice = createSlice({
     updateLoader: (state, action) => {
       state.loaders[action.payload.loader] = action.payload.loading;
     },
-    updateWalletCreating: (state, action) => {
-      state.walletCreating = action.payload;
+    updateDraftWallet: (state, action) => {
+      state.draftWallet = action.payload;
     },
     updateWalletsCreated: (state, action) => {
       state.walletsCreated = action.payload;
     },
-    addNewSignerToWalletCreating: (state, action) => {
-      state.walletCreating?.signers?.push(action.payload);
+    addNewSignerToDraftWallet: (state, action) => {
+      state.draftWallet?.signers?.push(action.payload);
     }
   }
 });
 
 const { actions, reducer } = generalSlice;
 
-export const {
-  updateTokensSecured,
-  updateUser,
-  updateData,
-  clearData,
-  updateLoader,
-  updateWalletCreating,
-  updateWalletsCreated,
-  addNewSignerToWalletCreating
-} = actions;
+export const { updateTokensSecured, updateUser, updateData, clearData, updateLoader, updateDraftWallet, updateWalletsCreated, addNewSignerToDraftWallet } =
+  actions;
 
 export default reducer;
