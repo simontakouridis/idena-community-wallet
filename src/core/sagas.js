@@ -111,7 +111,7 @@ function* creatingMultisigWallet(action) {
     } = action;
 
     yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'creatingWallet', loading: true } });
-    const txReceipt = yield call(getNewTransactionRecipt, tx, 'CallContract', user.address);
+    const txReceipt = yield call(getNewTransactionRecipt, tx, 'DeployContract', user.address);
     const contract = txReceipt?.contract;
 
     if (!contract) {
