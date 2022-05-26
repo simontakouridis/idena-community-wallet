@@ -93,8 +93,8 @@ export function* postNewWallet(address) {
 
 export function* postNewSigner(signer, contract) {
   const response = yield call(axios.post, `${appConfigurations.apiBaseUrl}/governance/add-signer`, { signer, contract });
-  if (response?.status !== 201 || !response?.data) {
-    throw new Error('Error posting new wallet');
+  if (response?.status !== 200 || !response?.data) {
+    throw new Error('Error posting new signer');
   }
   return response.data;
 }
