@@ -1,4 +1,4 @@
-import BN from 'bn.js';
+import { BN } from 'ethereumjs-util';
 import Decimal from 'decimal.js';
 
 const messages = require('./idenaProto/models_pb.js');

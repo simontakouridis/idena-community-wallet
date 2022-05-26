@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { actionNames } from './../core/constants';
+import { isValidAddress } from 'ethereumjs-util';
 
 function CreateWallet() {
   const dispatch = useDispatch();
@@ -26,6 +27,13 @@ function CreateWallet() {
         dispatch({ type: actionNames.creatingMultisigWallet, payload: { tx, user } });
       }
     }
+    if (location.pathname === '/create-wallet/adding') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tx = urlParams.get('tx');
+      if (tx) {
+        dispatch({ type: actionNames.addingSignerToMultisigWallet, payload: { tx, user } });
+      }
+    }
   }, [user]);
 
   const createMultisigWallet = async () => {
@@ -37,6 +45,10 @@ function CreateWallet() {
   };
 
   const addSignerToWalletCreating = async () => {
+    if (!isValidAddress(signer)) {
+      alert('Not a valid address!');
+      return;
+    }
     dispatch({ type: actionNames.addSignerToWalletCreating, payload: { signer, user, walletCreating } });
   };
 

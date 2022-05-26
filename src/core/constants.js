@@ -31,6 +31,7 @@ export const actionNames = {
   creatingMultisigWallet: 'creatingMultisigWallet',
   deleteWalletCreating: 'deleteWalletCreating',
   addSignerToWalletCreating: 'addSignerToWalletCreating',
+  addingSignerToMultisigWallet: 'addingSignerToMultisigWallet',
   getUserWallets: 'getUserWallets',
   // General Slice
   [generalSliceName]: {
@@ -41,6 +42,7 @@ export const actionNames = {
     clearData: generalSliceName + '/clearData',
     updateLoader: generalSliceName + '/updateLoader',
     updateWalletCreating: generalSliceName + '/updateWalletCreating',
-    updateWalletsCreated: generalSliceName + '/updateWalletsCreated'
+    updateWalletsCreated: generalSliceName + '/updateWalletsCreated',
+    addNewSignerToWalletCreating: generalSliceName + '/addNewSignerToWalletCreating'
   }
 };

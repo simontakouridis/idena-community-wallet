@@ -39,12 +39,24 @@ const generalSlice = createSlice({
     },
     updateWalletsCreated: (state, action) => {
       state.walletsCreated = action.payload;
+    },
+    addNewSignerToWalletCreating: (state, action) => {
+      state.walletCreating?.signers?.push(action.payload);
     }
   }
 });
 
 const { actions, reducer } = generalSlice;
 
-export const { updateTokensSecured, updateUser, updateData, clearData, updateLoader, updateWalletCreating, updateWalletsCreated } = actions;
+export const {
+  updateTokensSecured,
+  updateUser,
+  updateData,
+  clearData,
+  updateLoader,
+  updateWalletCreating,
+  updateWalletsCreated,
+  addNewSignerToWalletCreating
+} = actions;
 
 export default reducer;

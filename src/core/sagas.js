@@ -10,9 +10,9 @@ import {
   rpcGetBalance,
   getLastEpoch,
   getTransaction,
-  getContract,
   getMultisigContract,
   postNewWallet,
+  postNewSigner,
   getWallets,
   deleteWallet
 } from './api';
@@ -111,38 +111,14 @@ function* creatingMultisigWallet(action) {
     } = action;
 
     yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'creatingWallet', loading: true } });
-
-    let contract;
-    const iterations = 24;
-    const delayPerIteration = 5000;
-    for (let i = 0; i < iterations; i++) {
-      const transactionData = yield call(getTransaction, tx);
-      if (transactionData?.result?.blockHeight) {
-        if (transactionData.result.type === 'DeployContract' && transactionData.result.from.toLowerCase() === user.address) {
-          contract = transactionData.result.txReceipt.contractAddress.toLowerCase();
-        }
-        break;
-      }
-      if (i !== iterations - 1) {
-        yield delay(delayPerIteration);
-      }
-    }
+    const txReceipt = yield call(getNewTransactionRecipt, tx, 'CallContract', user.address);
+    const contract = txReceipt?.contract;
 
     if (!contract) {
       throw new Error('No contract found!');
     }
 
-    const contractData = yield call(getContract, contract);
-    if (contractData.address.toLowerCase() !== contract || contractData.type !== 'Multisig' || contractData.author.toLowerCase() !== user.address) {
-      throw new Error('Data inconsistency with new contract');
-    }
-
-    const multisigContractData = yield call(getMultisigContract, contract);
-    if (multisigContractData.minVotes !== 3 || multisigContractData.maxVotes !== 5 || multisigContractData.signers) {
-      throw new Error('Data inconsistency with new multisig contract');
-    }
-
-    const newWallet = yield call(postNewWallet, contract, user.address);
+    const newWallet = yield call(postNewWallet, contract);
     yield put({ type: actionNames[generalSliceName].updateWalletCreating, payload: newWallet });
   } catch (e) {
     console.error(e);
@@ -200,10 +176,56 @@ function* addSignerToWalletCreating(action) {
       callback_format: 'html',
       callback_url: encodeURIComponent(`${appConfigurations.localBaseUrl}/create-wallet/adding`)
     });
+    localStorage.setItem('newSigner', JSON.stringify({ signer, contract: walletCreating.address }));
     window.location.href = `${appConfigurations.idenaRawTxUrl}?` + params.toString();
   } catch (e) {
+    localStorage.removeItem('newSigner');
     console.error(e);
   } finally {
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'addingSigner', loading: false } });
+  }
+}
+
+function* addingSignerToMultisigWallet(action) {
+  try {
+    const {
+      payload: { tx, user }
+    } = action;
+
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'addingSigner', loading: true } });
+    const txReceipt = yield call(getNewTransactionRecipt, tx, 'CallContract', user.address);
+    const contract = txReceipt?.contract;
+    const method = txReceipt?.method;
+
+    if (!contract || method !== 'add') {
+      throw new Error('Something went wrong with adding signer.');
+    }
+    const multisigContractData = yield call(getMultisigContract, contract);
+    if (!multisigContractData?.signers) {
+      throw new Error('Data inconsistency with new multisig contract');
+    }
+    const wallets = yield call(getWallets, { address: contract });
+    if (wallets?.length !== 1 || wallets[0].signers?.length + 1 !== multisigContractData?.signers.length) {
+      throw new Error('Data inconsistency with wallet');
+    }
+    const remainingSigners = multisigContractData.signers.filter(signer => !wallets[0].signers.find(signer.address));
+    if (remainingSigners.length !== 1) {
+      throw new Error('More than one new signer detected');
+    }
+
+    const newSigner = remainingSigners[0].signer;
+    const newSignerLocal = localStorage.getItem('newSigner');
+    const newSignerLocalParsed = JSON.parse(newSignerLocal);
+    if (newSigner !== newSignerLocalParsed.signer || contract !== newSignerLocalParsed.contract) {
+      throw new Error('Data inconsistency with new signer');
+    }
+    yield call(postNewSigner, newSigner, contract);
+    yield put({ type: actionNames[generalSliceName].addNewSignerToWalletCreating, payload: newSigner });
+  } catch (e) {
+    console.error(e);
+    toast('Error adding signer');
+  } finally {
+    localStorage.removeItem('newSigner');
     yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'addingSigner', loading: false } });
   }
 }
@@ -217,18 +239,36 @@ function* getNonceAndEpoch(userAddress) {
   return { nonce, epoch };
 }
 
+function* getNewTransactionRecipt(tx, txType, userAddress) {
+  let txReceipt;
+  const iterations = 24;
+  const delayPerIteration = 5000;
+  for (let i = 0; i < iterations; i++) {
+    const transactionData = yield call(getTransaction, tx);
+    if (transactionData?.result?.blockHeight) {
+      if (transactionData.result.type === txType && transactionData.result.from.toLowerCase() === userAddress) {
+        txReceipt = transactionData.result.txReceipt;
+      }
+      break;
+    }
+    if (i !== iterations - 1) {
+      yield delay(delayPerIteration);
+    }
+  }
+  return txReceipt;
+}
+
 function* appRootSaga() {
   yield takeLatest(actionNames.processLogin, processLogin);
   yield takeLatest(actionNames.processlogout, processlogout);
   yield takeLatest(actionNames.refreshTokens, refreshTokens);
   yield takeLatest(actionNames.getData, getData);
   yield takeLatest(actionNames.createMultisigWallet, createMultisigWallet);
-
   yield takeLeading(actionNames.getUserWallets, getUserWallets);
   yield takeLeading(actionNames.creatingMultisigWallet, creatingMultisigWallet);
-
   yield takeLeading(actionNames.deleteWalletCreating, deleteWalletCreating);
   yield takeLeading(actionNames.addSignerToWalletCreating, addSignerToWalletCreating);
+  yield takeLeading(actionNames.addingSignerToMultisigWallet, addingSignerToMultisigWallet);
 }
 
 export default appRootSaga;

@@ -21,6 +21,7 @@ function App() {
 
   const Routes = () =>
     useRoutes([
+      { path: '/create-wallet/adding', element: <CreateWallet /> },
       { path: '/create-wallet/creating', element: <CreateWallet /> },
       { path: '/create-wallet', element: <CreateWallet /> },
       { path: '/delegates', element: <Delegates /> },
