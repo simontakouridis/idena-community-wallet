@@ -60,9 +60,9 @@ function CreateWallet() {
       </button>
       <div>isCreatingWallet: {isCreatingWallet ? 'true' : 'false'}</div>
       <br />
-      <div>Wallets Created: {JSON.stringify(walletsCreated)}</div>
+      <div style={{ wordBreak: 'break-all' }}>Wallets Created: {JSON.stringify(walletsCreated)}</div>
       <br />
-      <div>Draft Wallet: {JSON.stringify(draftWallet)}</div>
+      <div style={{ wordBreak: 'break-all' }}>Draft Wallet: {JSON.stringify(draftWallet)}</div>
       {draftWallet && (
         <>
           <button onClick={() => deleteDraftWallet()} disabled={isDeletingWallet}>

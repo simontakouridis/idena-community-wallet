@@ -85,13 +85,6 @@ function* createMultisigWallet(action) {
     const { nonce, epoch } = yield call(getNonceAndEpoch, user.address);
     const multisigPayload = getDeployMultisigPayload('5', '3');
     const tx = new Transaction(nonce, epoch, 0xf, '', 2 * 10 ** 18, 0.1 * 10 ** 18, 0, multisigPayload.toBytes());
-    const balanceData = yield call(rpcGetBalance, user.address);
-    const nonce = balanceData.nonce + 1;
-    const epochData = yield call(getLastEpoch);
-    const epoch = epochData.epoch;
-    const multisigPayload = getMultisigPayload();
-    const tx = new Transaction(nonce, epoch, 0xf, '', 5 * 10 ** 18, 0.1 * 10 ** 18, 0, multisigPayload.toBytes());
-    const tx = new Transaction(nonce, epoch, 3, '0x0000000000000000000000000000000000000000', 1 * 10 ** 18, 2 * 10 ** 18, 0, getMultisigPayload());
     const unsignedRawTx = '0x' + tx.toHex();
     const params = new URLSearchParams({
       tx: unsignedRawTx,
@@ -113,14 +106,14 @@ function* creatingMultisigWallet(action) {
 
     yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'creatingWallet', loading: true } });
     const txReceipt = yield call(getNewTransactionRecipt, tx, 'DeployContract', user.address);
-    const contract = txReceipt?.contract;
+    const contract = txReceipt?.contractAddress.toLowerCase();
 
     if (!contract) {
       throw new Error('No contract found!');
     }
 
-    const newDraftWallet = yield call(postNewDraftWallet, contract);
-    yield put({ type: actionNames[generalSliceName].updateDraftWallet, payload: newDraftWallet });
+    yield call(postNewDraftWallet, contract);
+    window.location.href = `${appConfigurations.localBaseUrl}/create-wallet`;
   } catch (e) {
     console.error(e);
     toast('Error creating draft wallet');
@@ -134,10 +127,10 @@ function* getUserWallets(action) {
     const {
       payload: { user }
     } = action;
-    const draftWallet = yield call(getDraftWallets, { author: user.address });
+    const draftWallets = yield call(getDraftWallets, { author: user.address });
     const walletsCreated = yield call(getWallets, { author: user.address });
 
-    yield put({ type: actionNames[generalSliceName].updateDraftWallet, payload: draftWallet });
+    yield put({ type: actionNames[generalSliceName].updateDraftWallet, payload: draftWallets?.[0] });
     yield put({ type: actionNames[generalSliceName].updateWalletsCreated, payload: walletsCreated });
   } catch (e) {
     console.error(e);
@@ -169,14 +162,14 @@ function* addSignerToDraftWallet(action) {
     const { nonce, epoch } = yield call(getNonceAndEpoch, user.address);
     const addSignerPayload = getAddSignerPayload(signer);
     const tx = new Transaction(nonce, epoch, 0x10, draftWallet.address, 2 * 10 ** 18, 0.1 * 10 ** 18, 0, addSignerPayload.toBytes());
-    const tx = new Transaction(nonce, epoch, 0x10, walletCreating.address, 2 * 10 ** 18, 0.1 * 10 ** 18, 0, addSignerPayload.toBytes());
     const unsignedRawTx = '0x' + tx.toHex();
     const params = new URLSearchParams({
       tx: unsignedRawTx,
       callback_format: 'html',
       callback_url: encodeURIComponent(`${appConfigurations.localBaseUrl}/create-wallet/adding`)
     });
-    localStorage.setItem('newSigner', JSON.stringify({ signer, contract: draftWallet.address }));
+    const newSignerStringified = JSON.stringify({ signer, contract: draftWallet.address });
+    localStorage.setItem('newSigner', newSignerStringified);
     window.location.href = `${appConfigurations.idenaRawTxUrl}?` + params.toString();
   } catch (e) {
     localStorage.removeItem('newSigner');
@@ -194,7 +187,7 @@ function* addingSignerToMultisigWallet(action) {
 
     yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'addingSigner', loading: true } });
     const txReceipt = yield call(getNewTransactionRecipt, tx, 'CallContract', user.address);
-    const contract = txReceipt?.contract;
+    const contract = txReceipt?.contractAddress.toLowerCase();
     const method = txReceipt?.method;
 
     if (!contract || method !== 'add') {
@@ -208,19 +201,19 @@ function* addingSignerToMultisigWallet(action) {
     if (draftWallets?.length !== 1 || draftWallets[0].signers?.length + 1 !== multisigContractData?.signers.length) {
       throw new Error('Data inconsistency with draft wallet');
     }
-    const remainingSigners = multisigContractData.signers.filter(signer => !draftWallets[0].signers.find(signer.address));
+    const remainingSigners = multisigContractData.signers.filter(signerA => !draftWallets[0].signers.find(signerB => signerB === signerA.address));
     if (remainingSigners.length !== 1) {
       throw new Error('More than one new signer detected');
     }
 
-    const newSigner = remainingSigners[0].signer;
+    const newSigner = remainingSigners[0].address;
     const newSignerLocal = localStorage.getItem('newSigner');
-    const newSignerLocalParsed = JSON.parse(newSignerLocal);
-    if (newSigner !== newSignerLocalParsed.signer || contract !== newSignerLocalParsed.contract) {
+    const newSignerLocalParsed = newSignerLocal && JSON.parse(newSignerLocal);
+    if (newSigner !== newSignerLocalParsed?.signer || contract !== newSignerLocalParsed?.contract) {
       throw new Error('Data inconsistency with new signer');
     }
     yield call(postNewSigner, newSigner, contract);
-    yield put({ type: actionNames[generalSliceName].addNewSignerToDraftWallet, payload: newSigner });
+    window.location.href = `${appConfigurations.localBaseUrl}/create-wallet`;
   } catch (e) {
     console.error(e);
     toast('Error adding signer');
