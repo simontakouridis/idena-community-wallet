@@ -30,6 +30,7 @@ export const actionNames = {
   createMultisigWallet: 'createMultisigWallet',
   creatingMultisigWallet: 'creatingMultisigWallet',
   deleteDraftWallet: 'deleteDraftWallet',
+  activateDraftWallet: 'activateDraftWallet',
   addSignerToDraftWallet: 'addSignerToDraftWallet',
   addingSignerToMultisigWallet: 'addingSignerToMultisigWallet',
   getUserWallets: 'getUserWallets',

@@ -11,7 +11,8 @@ const generalSlice = createSlice({
     loaders: {
       creatingWallet: false,
       deletingWallet: false,
-      addingSigner: false
+      addingSigner: false,
+      activatingWallet: false
     },
     draftWallet: null,
     walletsCreated: []

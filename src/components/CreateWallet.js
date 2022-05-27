@@ -10,6 +10,8 @@ function CreateWallet() {
   const user = useSelector(state => state.general.user);
   const isCreatingWallet = useSelector(state => state.general.loaders.creatingWallet);
   const isDeletingWallet = useSelector(state => state.general.loaders.deletingWallet);
+  const isAddingSigner = useSelector(state => state.general.loaders.addingSigner);
+  const isActivatingWallet = useSelector(state => state.general.loaders.activatingWallet);
   const draftWallet = useSelector(state => state.general.draftWallet);
   const walletsCreated = useSelector(state => state.general.walletsCreated);
 
@@ -44,6 +46,10 @@ function CreateWallet() {
     dispatch({ type: actionNames.deleteDraftWallet, payload: { draftWallet } });
   };
 
+  const activateDraftWallet = async () => {
+    dispatch({ type: actionNames.activateDraftWallet, payload: { draftWallet } });
+  };
+
   const addSignerToDraftWallet = async () => {
     if (!isValidAddress(signer)) {
       alert('Not a valid address!');
@@ -68,8 +74,15 @@ function CreateWallet() {
           <button onClick={() => deleteDraftWallet()} disabled={isDeletingWallet}>
             Delete
           </button>
-          <button onClick={() => addSignerToDraftWallet()}>Add Signer</button>
-          <input value={signer} onChange={e => setSigner(e.target.value)} />
+          <button disabled={draftWallet.signers.length < 5 || isActivatingWallet} onClick={() => activateDraftWallet()}>
+            Activate
+          </button>
+          <div>
+            <button disabled={draftWallet.signers.length >= 5 || isAddingSigner} onClick={() => addSignerToDraftWallet()}>
+              Add Signer
+            </button>
+            <input disabled={draftWallet.signers.length >= 5 || isAddingSigner} value={signer} onChange={e => setSigner(e.target.value)} />
+          </div>
         </>
       )}
     </>

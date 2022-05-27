@@ -15,7 +15,8 @@ import {
   postNewSigner,
   getDraftWallets,
   getWallets,
-  deleteWallet
+  deleteWallet,
+  activateWallet
 } from './api';
 import { getAuthLocalStorage, setAuthLocalStorage, removeAuthLocalStorage } from './utilities';
 import { appConfigurations } from './../core/constants';
@@ -145,11 +146,26 @@ function* deleteDraftWallet(action) {
     } = action;
     yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'deletingWallet', loading: true } });
     yield call(deleteWallet, draftWallet);
-    yield put({ type: actionNames[generalSliceName].updateDraftWallet, payload: null });
+    window.location.href = `${appConfigurations.localBaseUrl}/create-wallet`;
   } catch (e) {
     console.error(e);
   } finally {
     yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'deletingWallet', loading: false } });
+  }
+}
+
+function* activateDraftWallet(action) {
+  try {
+    const {
+      payload: { draftWallet }
+    } = action;
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'activatingWallet', loading: true } });
+    yield call(activateWallet, draftWallet);
+    window.location.href = `${appConfigurations.localBaseUrl}/create-wallet`;
+  } catch (e) {
+    console.error(e);
+  } finally {
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'activatingWallet', loading: false } });
   }
 }
 
@@ -260,6 +276,7 @@ function* appRootSaga() {
   yield takeLeading(actionNames.getUserWallets, getUserWallets);
   yield takeLeading(actionNames.creatingMultisigWallet, creatingMultisigWallet);
   yield takeLeading(actionNames.deleteDraftWallet, deleteDraftWallet);
+  yield takeLeading(actionNames.activateDraftWallet, activateDraftWallet);
   yield takeLeading(actionNames.addSignerToDraftWallet, addSignerToDraftWallet);
   yield takeLeading(actionNames.addingSignerToMultisigWallet, addingSignerToMultisigWallet);
 }

@@ -122,3 +122,11 @@ export function* deleteWallet(draftWallet) {
   }
   return loginResponse.data.results;
 }
+
+export function* activateWallet(draftWallet) {
+  const loginResponse = yield call(axios.patch, `${appConfigurations.apiBaseUrl}/governance/draft-wallets/${draftWallet.id}`);
+  if (loginResponse?.status !== 200) {
+    throw new Error('Error activating wallet');
+  }
+  return loginResponse.data.results;
+}
