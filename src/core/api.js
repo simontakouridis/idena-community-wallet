@@ -26,8 +26,8 @@ export function* getTokens(refreshToken) {
   return loginResponse.data;
 }
 
-export function* getUsers() {
-  const loginResponse = yield call(axios.get, `${appConfigurations.apiBaseUrl}/users`);
+export function* getUsers(params) {
+  const loginResponse = yield call(axios.get, `${appConfigurations.apiBaseUrl}/users`, { params });
   if (loginResponse?.status !== 200 || !loginResponse?.data?.results) {
     throw new Error('Error getting users');
   }

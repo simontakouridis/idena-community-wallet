@@ -14,8 +14,10 @@ function CreateWallet() {
   const isActivatingWallet = useSelector(state => state.general.loaders.activatingWallet);
   const draftWallet = useSelector(state => state.general.draftWallet);
   const walletsCreated = useSelector(state => state.general.walletsCreated);
+  const wallets = useSelector(state => state.general.data.wallets);
 
   const [signer, setSigner] = useState('');
+  const [isCurrentDelegate, setIsCurrentDelegate] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -37,6 +39,22 @@ function CreateWallet() {
       }
     }
   }, [user]);
+
+  useEffect(() => {
+    if (!wallets?.length || !user) {
+      return;
+    }
+
+    const currentWallet = wallets.sort((a, b) => {
+      return b.round - a.round;
+    })[0];
+
+    setIsCurrentDelegate(currentWallet.signers.includes(user.address));
+  }, [wallets, user]);
+
+  const canCreateMultisig = () => {
+    return wallets?.length == 0 || isCurrentDelegate;
+  };
 
   const createMultisigWallet = async () => {
     dispatch({ type: actionNames.createMultisigWallet, payload: { user } });
@@ -61,7 +79,7 @@ function CreateWallet() {
   return (
     <>
       <h2>CreateWallet</h2>
-      <button onClick={() => createMultisigWallet()} disabled={isCreatingWallet || draftWallet}>
+      <button onClick={() => createMultisigWallet()} disabled={isCreatingWallet || draftWallet || !canCreateMultisig()}>
         Create New Multisig Wallet
       </button>
       <div>isCreatingWallet: {isCreatingWallet ? 'true' : 'false'}</div>

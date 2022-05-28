@@ -67,11 +67,12 @@ function* refreshTokens() {
 
 function* getData() {
   try {
-    const users = yield call(getUsers);
+    const users = yield call(getUsers, { role: 'admin' });
+    const wallets = yield call(getWallets);
     if (!users) {
       throw new Error('Missing users data');
     }
-    yield put({ type: actionNames[generalSliceName].updateData, payload: { users } });
+    yield put({ type: actionNames[generalSliceName].updateData, payload: { users, wallets } });
   } catch (e) {
     console.error(e);
   }

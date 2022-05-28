@@ -7,7 +7,10 @@ const generalSlice = createSlice({
   initialState: {
     tokensSecured: false,
     user: null,
-    data: {},
+    data: {
+      users: [],
+      wallets: []
+    },
     loaders: {
       creatingWallet: false,
       deletingWallet: false,
@@ -27,6 +30,7 @@ const generalSlice = createSlice({
     updateData: (state, action) => {
       if (action.payload?.users) {
         state.data.users = action.payload.users;
+        state.data.wallets = action.payload.wallets;
       }
     },
     clearData: state => {

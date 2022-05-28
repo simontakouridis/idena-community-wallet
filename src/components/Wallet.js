@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 function Wallet() {
   const user = useSelector(state => state.general.user);
 
-  const canCreateNewWallet = () => {
+  const isAdmin = () => {
     return user?.role === 'admin';
   };
 
@@ -12,7 +12,7 @@ function Wallet() {
     <>
       <h2>Wallet</h2>
 
-      {canCreateNewWallet() && (
+      {isAdmin() && (
         <>
           <Link to="/create-wallet">CREATE WALLET</Link>
         </>
