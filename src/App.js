@@ -10,8 +10,9 @@ import SignIn from './components/SignIn';
 import Home from './components/Home';
 import CreateWallet from './components/CreateWallet';
 import Delegates from './components/Delegates';
+import DelegateDetails from './components/DelegateDetails';
 import Proposals from './components/Proposals';
-import Wallet from './components/Wallet';
+import Wallets from './components/Wallets';
 import './App.css';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -24,9 +25,10 @@ function App() {
       { path: '/create-wallet/adding', element: <CreateWallet /> },
       { path: '/create-wallet/creating', element: <CreateWallet /> },
       { path: '/create-wallet', element: <CreateWallet /> },
+      { path: '/delegates/:delegate', element: <DelegateDetails /> },
       { path: '/delegates', element: <Delegates /> },
       { path: '/proposals', element: <Proposals /> },
-      { path: '/wallet', element: <Wallet /> },
+      { path: '/wallets', element: <Wallets /> },
       { path: '/', element: <Home /> }
     ]);
 
@@ -72,7 +74,7 @@ function App() {
       <div className="App">
         <div className="Container">
           <SignIn />
-          <Link to="/">Home</Link> | <Link to="/delegates">Delegates</Link> | <Link to="/proposals">Proposals</Link> | <Link to="/wallet">Wallet</Link>
+          <Link to="/">Home</Link> | <Link to="/delegates">Delegates</Link> | <Link to="/proposals">Proposals</Link> | <Link to="/wallets">Wallets</Link>
           <Routes />
         </div>
         <ToastContainer />

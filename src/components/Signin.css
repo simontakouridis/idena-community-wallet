@@ -1,0 +1,21 @@
+.SignIn .UserImg {
+  width: 100px;
+  height: 100px;
+}
+
+.SignIn .SignInButtonDiv {
+  margin: 10px;
+}
+
+.SignIn .SignInButtonDiv button:hover {
+  cursor: pointer;
+}
+
+.SignIn .UsersDiv {
+  margin-top: 30px;
+}
+
+.SignIn .UsersImg {
+  width: 30px;
+  height: 30px;
+}

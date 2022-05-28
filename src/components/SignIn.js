@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { actionNames } from './../core/constants';
 import { truncateAddress } from './../core/utilities';
 import { appConfigurations } from './../core/constants';
+import './Signin.css';
 
 function SignIn() {
   const user = useSelector(state => state.general.user);
@@ -29,7 +30,7 @@ function SignIn() {
   };
 
   return (
-    <>
+    <div className="SignIn">
       {user && (
         <div>
           <div>
@@ -47,7 +48,7 @@ function SignIn() {
       <div className="SignInButtonDiv">
         {tokensSecured ? <button onClick={() => signOut()}>Sign Out</button> : <button onClick={() => idenaSignIn()}>Sign in with Idena</button>}
       </div>
-    </>
+    </div>
   );
 }
 

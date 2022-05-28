@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { actionNames } from './../core/constants';
 import { isValidAddress } from 'ethereumjs-util';
+import { getCurrentWalletFromState } from './../core/utilities';
 
 function CreateWallet() {
   const dispatch = useDispatch();
@@ -14,7 +15,8 @@ function CreateWallet() {
   const isActivatingWallet = useSelector(state => state.general.loaders.activatingWallet);
   const draftWallet = useSelector(state => state.general.draftWallet);
   const walletsCreated = useSelector(state => state.general.walletsCreated);
-  const wallets = useSelector(state => state.general.data.wallets);
+  const currentWallet = useSelector(getCurrentWalletFromState);
+  const users = useSelector(state => state.general.data.users);
 
   const [signer, setSigner] = useState('');
   const [isCurrentDelegate, setIsCurrentDelegate] = useState(false);
@@ -41,19 +43,14 @@ function CreateWallet() {
   }, [user]);
 
   useEffect(() => {
-    if (!wallets?.length || !user) {
+    if (!currentWallet || !user) {
       return;
     }
-
-    const currentWallet = wallets.sort((a, b) => {
-      return b.round - a.round;
-    })[0];
-
     setIsCurrentDelegate(currentWallet.signers.includes(user.address));
-  }, [wallets, user]);
+  }, [currentWallet, user]);
 
   const canCreateMultisig = () => {
-    return wallets?.length == 0 || isCurrentDelegate;
+    return (!currentWallet && users?.length === 1) || isCurrentDelegate;
   };
 
   const createMultisigWallet = async () => {

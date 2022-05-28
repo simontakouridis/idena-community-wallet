@@ -5,28 +5,6 @@
   justify-content: center;
 }
 
-.Container {
+.App .Container {
   text-align: center;
-}
-
-.UserImg {
-  width: 100px;
-  height: 100px;
-}
-
-.SignInButtonDiv {
-  margin: 10px;
-}
-
-.SignInButtonDiv button:hover {
-  cursor: pointer;
-}
-
-.UsersDiv {
-  margin-top: 30px;
-}
-
-.UsersImg {
-  width: 30px;
-  height: 30px;
 }
