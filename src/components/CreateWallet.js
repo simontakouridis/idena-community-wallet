@@ -1,22 +1,24 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { actionNames } from './../core/constants';
 import { isValidAddress } from 'ethereumjs-util';
-import { getCurrentWalletFromState } from './../core/utilities';
+import { truncateAddress } from './../core/utilities';
+import loadingSvg from './../assets/loading.svg';
+import './CreateWallet.css';
 
 function CreateWallet() {
   const dispatch = useDispatch();
   const location = useLocation();
   const user = useSelector(state => state.general.user);
+  const draftWallet = useSelector(state => state.general.draftWallet);
+  const currentWallet = useSelector(state => state.general.data.wallets?.[0]);
+  const users = useSelector(state => state.general.data.users);
+
   const isCreatingWallet = useSelector(state => state.general.loaders.creatingWallet);
   const isDeletingWallet = useSelector(state => state.general.loaders.deletingWallet);
   const isAddingSigner = useSelector(state => state.general.loaders.addingSigner);
   const isActivatingWallet = useSelector(state => state.general.loaders.activatingWallet);
-  const draftWallet = useSelector(state => state.general.draftWallet);
-  const walletsCreated = useSelector(state => state.general.walletsCreated);
-  const currentWallet = useSelector(getCurrentWalletFromState);
-  const users = useSelector(state => state.general.data.users);
 
   const [signer, setSigner] = useState('');
   const [isCurrentDelegate, setIsCurrentDelegate] = useState(false);
@@ -74,33 +76,64 @@ function CreateWallet() {
   };
 
   return (
-    <>
-      <h2>CreateWallet</h2>
+    <div className="CreateWallet">
+      <h2>Create Wallet</h2>
       <button onClick={() => createMultisigWallet()} disabled={isCreatingWallet || draftWallet || !canCreateMultisig()}>
-        Create New Multisig Wallet
+        {isCreatingWallet ? 'Creating Wallet...' : 'Create New Multisig Wallet'}
+        {isCreatingWallet && <img className="loadingImg" src={loadingSvg} />}
       </button>
-      <div>isCreatingWallet: {isCreatingWallet ? 'true' : 'false'}</div>
-      <br />
-      <div style={{ wordBreak: 'break-all' }}>Wallets Created: {JSON.stringify(walletsCreated)}</div>
-      <br />
-      <div style={{ wordBreak: 'break-all' }}>Draft Wallet: {JSON.stringify(draftWallet)}</div>
       {draftWallet && (
-        <>
-          <button onClick={() => deleteDraftWallet()} disabled={isDeletingWallet}>
-            Delete
-          </button>
-          <button disabled={draftWallet.signers.length < 5 || isActivatingWallet} onClick={() => activateDraftWallet()}>
-            Activate
-          </button>
+        <div className="draftWalletContainer">
+          <div>
+            <div>
+              <b>Draft wallet details</b>
+            </div>
+            <div>
+              <b>Address:</b> {draftWallet.address}
+            </div>
+            <div>
+              <b>Author:</b> {draftWallet.author}
+            </div>
+            <div>
+              <b>Signers:</b>{' '}
+              {draftWallet.signers[0] ? (
+                draftWallet.signers.map((signer, index, arr) => (
+                  <Link key={signer} to={`/delegates/${signer}`}>
+                    <span>
+                      {truncateAddress(signer)} {index !== arr.length - 1 && ', '}
+                    </span>
+                  </Link>
+                ))
+              ) : (
+                <i>no signers added</i>
+              )}
+            </div>
+          </div>
           <div>
             <button disabled={draftWallet.signers.length >= 5 || isAddingSigner} onClick={() => addSignerToDraftWallet()}>
-              Add Signer
+              {isAddingSigner ? 'Adding Signer...' : 'Add Signer'}
+              {isAddingSigner && <img className="loadingImg" src={loadingSvg} />}
             </button>
-            <input disabled={draftWallet.signers.length >= 5 || isAddingSigner} value={signer} onChange={e => setSigner(e.target.value)} />
+            <input
+              disabled={draftWallet.signers.length >= 5 || isAddingSigner}
+              value={signer}
+              onChange={e => setSigner(e.target.value)}
+              placeholder="New Signer Address"
+            />
           </div>
-        </>
+          <div>
+            <button onClick={() => deleteDraftWallet()} disabled={isDeletingWallet}>
+              {isDeletingWallet ? 'Deleting Wallet...' : 'Delete Draft Wallet'}
+              {isDeletingWallet && <img className="loadingImg" src={loadingSvg} />}
+            </button>
+            <button disabled={draftWallet.signers.length < 5 || isActivatingWallet} onClick={() => activateDraftWallet()}>
+              {isActivatingWallet ? 'Activating Wallet...' : 'Activate Draft Wallet'}
+              {isActivatingWallet && <img className="loadingImg" src={loadingSvg} />}
+            </button>
+          </div>
+        </div>
       )}
-    </>
+    </div>
   );
 }
 

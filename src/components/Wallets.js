@@ -1,10 +1,10 @@
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { truncateAddress, getWalletsFromStateDesc } from './../core/utilities';
+import { truncateAddress } from './../core/utilities';
 
 function Wallets() {
   const user = useSelector(state => state.general.user);
-  const wallets = useSelector(getWalletsFromStateDesc);
+  const wallets = useSelector(state => state.general.data.wallets);
 
   const isAdmin = () => {
     return user?.role === 'admin';

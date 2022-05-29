@@ -11,6 +11,7 @@ import Home from './components/Home';
 import CreateWallet from './components/CreateWallet';
 import Delegates from './components/Delegates';
 import DelegateDetails from './components/DelegateDetails';
+import CreateProposal from './components/CreateProposal';
 import Proposals from './components/Proposals';
 import Wallets from './components/Wallets';
 import './App.css';
@@ -27,12 +28,14 @@ function App() {
       { path: '/create-wallet', element: <CreateWallet /> },
       { path: '/delegates/:delegate', element: <DelegateDetails /> },
       { path: '/delegates', element: <Delegates /> },
+      { path: '/create-proposal', element: <CreateProposal /> },
       { path: '/proposals', element: <Proposals /> },
       { path: '/wallets', element: <Wallets /> },
       { path: '/', element: <Home /> }
     ]);
 
   useEffect(() => {
+    dispatch({ type: actionNames.getData });
     const urlParams = new URLSearchParams(window.location.search);
     const idenaAuthToken = urlParams.get('token');
     const { tokens } = getAuthLocalStorage();
@@ -58,8 +61,6 @@ function App() {
       intervalId = setInterval(() => {
         dispatch({ type: actionNames.refreshTokens });
       }, appConfigurations.refreshTokensMinutes * 60 * 1000);
-
-      dispatch({ type: actionNames.getData });
     } else {
       dispatch({ type: actionNames[generalSliceName].updateUser, payload: null });
       intervalId && clearInterval(intervalId);

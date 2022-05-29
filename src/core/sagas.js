@@ -1,4 +1,4 @@
-import { call, put, delay, takeLeading, takeLatest } from 'redux-saga/effects';
+import { all, call, put, delay, takeLeading, takeLatest } from 'redux-saga/effects';
 import { sliceName as generalSliceName } from './reducer';
 import { actionNames } from './constants';
 import { toast } from 'react-toastify';
@@ -7,6 +7,9 @@ import {
   getTokens,
   logout,
   getUsers,
+  getWallets,
+  getProposals,
+  getTransactions,
   rpcGetBalance,
   getLastEpoch,
   getTransaction,
@@ -14,7 +17,6 @@ import {
   postNewDraftWallet,
   postNewSigner,
   getDraftWallets,
-  getWallets,
   deleteWallet,
   activateWallet
 } from './api';
@@ -67,12 +69,17 @@ function* refreshTokens() {
 
 function* getData() {
   try {
-    const users = yield call(getUsers, { role: 'admin' });
-    const wallets = yield call(getWallets);
+    const [users, wallets, proposals, transactions] = yield all([
+      call(getUsers, { role: 'admin' }),
+      call(getWallets),
+      call(getProposals),
+      call(getTransactions)
+    ]);
+
     if (!users) {
       throw new Error('Missing users data');
     }
-    yield put({ type: actionNames[generalSliceName].updateData, payload: { users, wallets } });
+    yield put({ type: actionNames[generalSliceName].updateData, payload: { users, wallets, proposals, transactions } });
   } catch (e) {
     console.error(e);
   }
@@ -86,7 +93,7 @@ function* createMultisigWallet(action) {
     yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'creatingWallet', loading: true } });
     const { nonce, epoch } = yield call(getNonceAndEpoch, user.address);
     const multisigPayload = getDeployMultisigPayload('5', '3');
-    const tx = new Transaction(nonce, epoch, 0xf, '', 2 * 10 ** 18, 0.1 * 10 ** 18, 0, multisigPayload.toBytes());
+    const tx = new Transaction(nonce, epoch, 0xf, '', 4 * 10 ** 18, 0.1 * 10 ** 18, 0, multisigPayload.toBytes());
     const unsignedRawTx = '0x' + tx.toHex();
     const params = new URLSearchParams({
       tx: unsignedRawTx,
@@ -147,7 +154,7 @@ function* deleteDraftWallet(action) {
     } = action;
     yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'deletingWallet', loading: true } });
     yield call(deleteWallet, draftWallet);
-    window.location.href = `${appConfigurations.localBaseUrl}/create-wallet`;
+    yield put({ type: actionNames[generalSliceName].clearDraftWallet });
   } catch (e) {
     console.error(e);
   } finally {
@@ -178,7 +185,7 @@ function* addSignerToDraftWallet(action) {
     yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'addingSigner', loading: true } });
     const { nonce, epoch } = yield call(getNonceAndEpoch, user.address);
     const addSignerPayload = getAddSignerPayload(signer);
-    const tx = new Transaction(nonce, epoch, 0x10, draftWallet.address, 2 * 10 ** 18, 0.1 * 10 ** 18, 0, addSignerPayload.toBytes());
+    const tx = new Transaction(nonce, epoch, 0x10, draftWallet.address, 4 * 10 ** 18, 0.1 * 10 ** 18, 0, addSignerPayload.toBytes());
     const unsignedRawTx = '0x' + tx.toHex();
     const params = new URLSearchParams({
       tx: unsignedRawTx,

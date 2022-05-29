@@ -1,0 +1,12 @@
+.CreateWallet .loadingImg {
+  width: 15px;
+  height: 15px;
+}
+
+.CreateWallet .draftWalletContainer {
+  margin: 10px;
+}
+
+.CreateWallet .draftWalletContainer > div {
+  margin-bottom: 10px;
+}

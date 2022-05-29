@@ -31,10 +31,3 @@ export const getExpiresCurrentUnixMilli = expires => {
 export const truncateAddress = address => {
   return `${address.slice(0, 4)}...${address.slice(-2)}`;
 };
-
-export const getCurrentWalletFromState = state => getWalletsFromStateDesc(state)[0];
-
-export const getWalletsFromStateDesc = state =>
-  state.general.data.wallets?.sort((a, b) => {
-    return b.round - a.round;
-  });

@@ -34,6 +34,7 @@ export const actionNames = {
   addSignerToDraftWallet: 'addSignerToDraftWallet',
   addingSignerToMultisigWallet: 'addingSignerToMultisigWallet',
   getUserWallets: 'getUserWallets',
+  createProposal: 'createProposal',
   // General Slice
   [generalSliceName]: {
     updateTokensSecured: generalSliceName + '/updateTokensSecured',
@@ -43,6 +44,7 @@ export const actionNames = {
     clearData: generalSliceName + '/clearData',
     updateLoader: generalSliceName + '/updateLoader',
     updateDraftWallet: generalSliceName + '/updateDraftWallet',
+    clearDraftWallet: generalSliceName + '/clearDraftWallet',
     updateWalletsCreated: generalSliceName + '/updateWalletsCreated',
     addNewSignerToDraftWallet: generalSliceName + '/addNewSignerToDraftWallet'
   }

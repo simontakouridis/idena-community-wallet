@@ -34,6 +34,30 @@ export function* getUsers(params) {
   return loginResponse.data.results;
 }
 
+export function* getWallets(params) {
+  const loginResponse = yield call(axios.get, `${appConfigurations.apiBaseUrl}/governance/wallets`, { params });
+  if (loginResponse?.status !== 200 || !loginResponse?.data?.results) {
+    throw new Error('Error getting wallets');
+  }
+  return loginResponse.data.results;
+}
+
+export function* getProposals(params) {
+  const loginResponse = yield call(axios.get, `${appConfigurations.apiBaseUrl}/governance/proposals`, { params });
+  if (loginResponse?.status !== 200 || !loginResponse?.data?.results) {
+    throw new Error('Error getting proposals');
+  }
+  return loginResponse.data.results;
+}
+
+export function* getTransactions(params) {
+  const loginResponse = yield call(axios.get, `${appConfigurations.apiBaseUrl}/governance/transactions`, { params });
+  if (loginResponse?.status !== 200 || !loginResponse?.data?.results) {
+    throw new Error('Error getting transactions');
+  }
+  return loginResponse.data.results;
+}
+
 export function* getAddress(address) {
   const response = yield call(axios.get, `${appConfigurations.idenaApiUrl}/Address/${address}`);
   if (response?.status !== 200 || (!response?.data?.result && !response?.data?.error)) {
@@ -107,17 +131,9 @@ export function* getDraftWallets(params) {
   return loginResponse.data.results;
 }
 
-export function* getWallets(params) {
-  const loginResponse = yield call(axios.get, `${appConfigurations.apiBaseUrl}/governance/wallets`, { params });
-  if (loginResponse?.status !== 200 || !loginResponse?.data?.results) {
-    throw new Error('Error getting wallets');
-  }
-  return loginResponse.data.results;
-}
-
 export function* deleteWallet(draftWallet) {
   const loginResponse = yield call(axios.delete, `${appConfigurations.apiBaseUrl}/governance/draft-wallets/${draftWallet.id}`);
-  if (loginResponse?.status !== 200) {
+  if (loginResponse?.status !== 204) {
     throw new Error('Error deleting wallet');
   }
   return loginResponse.data.results;
