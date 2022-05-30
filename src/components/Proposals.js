@@ -16,8 +16,8 @@ function Proposals() {
 
     const proposalsGrouped = {};
     for (let i = 0; i < wallets.length; i++) {
-      const walletAddress = wallets[i].address;
-      proposalsGrouped[walletAddress] = proposals?.filter(proposal => proposal.wallet === walletAddress);
+      const walletId = wallets[i].id;
+      proposalsGrouped[walletId] = proposals?.filter(proposal => proposal.wallet === walletId);
     }
     setProposalsGrouped(proposalsGrouped);
   }, [proposals, wallets]);
@@ -25,14 +25,6 @@ function Proposals() {
   const isAdmin = () => {
     return user?.role === 'admin';
   };
-
-  // *               title: 'Title of Proposal'
-  // *               description: 'Description of Proposal'
-  // *               oracle: '0xebb1bc133f0db6869c8ba67d0ce94ea86be83bc1'
-  // *               wallet: 62807ce6e069cd00272fa3af
-  // *               accepted: pending
-  // *               status: pending
-  // *               transaction: 62807d2ce069cd00272fa3c0
 
   return (
     <div>
@@ -45,11 +37,31 @@ function Proposals() {
       {wallets?.map(wallet => (
         <div key={wallet.round}>
           <h3>Round {wallet.round}</h3>
-          {proposalsGrouped[wallet.address] ? (
-            proposalsGrouped[wallet.address].map(proposal => (
-              <>
-                <div>{JSON.stringify(proposal)}</div>
-              </>
+          {proposalsGrouped[wallet.id] ? (
+            proposalsGrouped[wallet.id].map(proposal => (
+              <div key={proposal.id}>
+                <div>
+                  <b>{proposal.title}</b>
+                </div>
+                <div>{proposal.description}</div>
+                <div>
+                  <b>Associated Oracle:</b> {proposal.oracle}
+                </div>
+                <div>
+                  <b>Acceptance Status:</b> {proposal.acceptanceStatus}
+                </div>
+                <div>
+                  <b>Funding Status:</b> {proposal.fundingStatus}
+                </div>
+                {proposal.transaction && (
+                  <div>
+                    <b>Transaction:</b> {proposal.transaction}
+                  </div>
+                )}
+                <div>
+                  <Link to={`/proposals/${proposal.id}/edit`}>EDIT PROPOSAL</Link>
+                </div>
+              </div>
             ))
           ) : (
             <div>

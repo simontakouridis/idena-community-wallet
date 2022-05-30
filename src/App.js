@@ -12,6 +12,7 @@ import CreateWallet from './components/CreateWallet';
 import Delegates from './components/Delegates';
 import DelegateDetails from './components/DelegateDetails';
 import CreateProposal from './components/CreateProposal';
+import EditProposal from './components/EditProposal';
 import Proposals from './components/Proposals';
 import Wallets from './components/Wallets';
 import './App.css';
@@ -29,6 +30,7 @@ function App() {
       { path: '/delegates/:delegate', element: <DelegateDetails /> },
       { path: '/delegates', element: <Delegates /> },
       { path: '/create-proposal', element: <CreateProposal /> },
+      { path: '/proposals/:proposal/edit', element: <EditProposal /> },
       { path: '/proposals', element: <Proposals /> },
       { path: '/wallets', element: <Wallets /> },
       { path: '/', element: <Home /> }

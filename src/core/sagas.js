@@ -18,7 +18,10 @@ import {
   postNewSigner,
   getDraftWallets,
   deleteWallet,
-  activateWallet
+  activateWallet,
+  postNewProposal,
+  editProposal,
+  deleteProposal
 } from './api';
 import { getAuthLocalStorage, setAuthLocalStorage, removeAuthLocalStorage } from './utilities';
 import { appConfigurations } from './../core/constants';
@@ -275,18 +278,84 @@ function* getNewTransactionRecipt(tx, txType, userAddress) {
   return txReceipt;
 }
 
+function* createProposalSaga(action) {
+  try {
+    const {
+      payload: { newEditedProposal }
+    } = action;
+
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'creatingEditingProposal', loading: true } });
+    const requestBody = {
+      title: newEditedProposal.title,
+      ...(newEditedProposal.description && { description: newEditedProposal.description }),
+      ...(newEditedProposal.oracle && { oracle: newEditedProposal.oracle })
+    };
+    yield call(postNewProposal, requestBody);
+    window.location.href = `${appConfigurations.localBaseUrl}/proposals`;
+  } catch (e) {
+    console.error(e);
+    toast('Error creating proposal');
+  } finally {
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'creatingEditingProposal', loading: false } });
+  }
+}
+
+function* editProposalSaga(action) {
+  try {
+    const {
+      payload: { newEditedProposal }
+    } = action;
+
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'creatingEditingProposal', loading: true } });
+    const requestBody = {
+      ...(newEditedProposal.title && { title: newEditedProposal.title }),
+      ...(newEditedProposal.description && { description: newEditedProposal.description }),
+      ...(newEditedProposal.oracle && { oracle: newEditedProposal.oracle }),
+      ...(newEditedProposal.acceptanceStatus && { acceptanceStatus: newEditedProposal.acceptanceStatus }),
+      ...(newEditedProposal.fundingStatus && { fundingStatus: newEditedProposal.fundingStatus }),
+      ...(newEditedProposal.transaction && { transaction: newEditedProposal.transaction })
+    };
+
+    yield call(editProposal, newEditedProposal.id, requestBody);
+    window.location.href = `${appConfigurations.localBaseUrl}/proposals`;
+  } catch (e) {
+    console.error(e);
+    toast('Error editing proposal');
+  } finally {
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'creatingEditingProposal', loading: false } });
+  }
+}
+
+function* deleteProposalSaga(action) {
+  try {
+    const {
+      payload: { proposalId }
+    } = action;
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'deletingProposal', loading: true } });
+    yield call(deleteProposal, proposalId);
+    window.location.href = `${appConfigurations.localBaseUrl}/proposals`;
+  } catch (e) {
+    console.error(e);
+  } finally {
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'deletingProposal', loading: false } });
+  }
+}
+
 function* appRootSaga() {
   yield takeLatest(actionNames.processLogin, processLogin);
   yield takeLatest(actionNames.processlogout, processlogout);
   yield takeLatest(actionNames.refreshTokens, refreshTokens);
-  yield takeLatest(actionNames.getData, getData);
-  yield takeLatest(actionNames.createMultisigWallet, createMultisigWallet);
+  yield takeLeading(actionNames.getData, getData);
+  yield takeLeading(actionNames.createMultisigWallet, createMultisigWallet);
   yield takeLeading(actionNames.getUserWallets, getUserWallets);
   yield takeLeading(actionNames.creatingMultisigWallet, creatingMultisigWallet);
   yield takeLeading(actionNames.deleteDraftWallet, deleteDraftWallet);
   yield takeLeading(actionNames.activateDraftWallet, activateDraftWallet);
   yield takeLeading(actionNames.addSignerToDraftWallet, addSignerToDraftWallet);
   yield takeLeading(actionNames.addingSignerToMultisigWallet, addingSignerToMultisigWallet);
+  yield takeLeading(actionNames.createProposal, createProposalSaga);
+  yield takeLeading(actionNames.editProposal, editProposalSaga);
+  yield takeLeading(actionNames.deleteProposal, deleteProposalSaga);
 }
 
 export default appRootSaga;

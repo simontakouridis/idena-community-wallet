@@ -136,7 +136,6 @@ export function* deleteWallet(draftWallet) {
   if (loginResponse?.status !== 204) {
     throw new Error('Error deleting wallet');
   }
-  return loginResponse.data.results;
 }
 
 export function* activateWallet(draftWallet) {
@@ -145,4 +144,27 @@ export function* activateWallet(draftWallet) {
     throw new Error('Error activating wallet');
   }
   return loginResponse.data.results;
+}
+
+export function* postNewProposal(body) {
+  const response = yield call(axios.post, `${appConfigurations.apiBaseUrl}/governance/create-proposal`, body);
+  if (response?.status !== 201 || !response?.data) {
+    throw new Error('Error posting new proposal');
+  }
+  return response.data;
+}
+
+export function* editProposal(proposalId, body) {
+  const response = yield call(axios.put, `${appConfigurations.apiBaseUrl}/governance/proposals/${proposalId}`, body);
+  if (response?.status !== 200 || !response?.data) {
+    throw new Error('Error editing proposal');
+  }
+  return response.data;
+}
+
+export function* deleteProposal(proposalId) {
+  const loginResponse = yield call(axios.delete, `${appConfigurations.apiBaseUrl}/governance/proposals/${proposalId}`);
+  if (loginResponse?.status !== 204) {
+    throw new Error('Error deleting proposal');
+  }
 }

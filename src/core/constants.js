@@ -35,6 +35,8 @@ export const actionNames = {
   addingSignerToMultisigWallet: 'addingSignerToMultisigWallet',
   getUserWallets: 'getUserWallets',
   createProposal: 'createProposal',
+  editProposal: 'editProposal',
+  deleteProposal: 'deleteProposal',
   // General Slice
   [generalSliceName]: {
     updateTokensSecured: generalSliceName + '/updateTokensSecured',
