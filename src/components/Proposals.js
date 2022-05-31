@@ -4,10 +4,19 @@ import { Link } from 'react-router-dom';
 
 function Proposals() {
   const user = useSelector(state => state.general.user);
+  const currentWallet = useSelector(state => state.general.data.wallets?.[0]);
   const wallets = useSelector(state => state.general.data.wallets);
   const proposals = useSelector(state => state.general.data.proposals);
 
+  const [isCurrentDelegate, setIsCurrentDelegate] = useState(false);
   const [proposalsGrouped, setProposalsGrouped] = useState([]);
+
+  useEffect(() => {
+    if (!currentWallet || !user) {
+      return;
+    }
+    setIsCurrentDelegate(currentWallet.signers.includes(user.address));
+  }, [currentWallet, user]);
 
   useEffect(() => {
     if (!proposals?.length || !wallets?.length) {
@@ -22,14 +31,10 @@ function Proposals() {
     setProposalsGrouped(proposalsGrouped);
   }, [proposals, wallets]);
 
-  const isAdmin = () => {
-    return user?.role === 'admin';
-  };
-
   return (
     <div>
       <h2>Proposals</h2>
-      {isAdmin() && (
+      {isCurrentDelegate && (
         <>
           <Link to="/create-proposal">CREATE PROPOSAL</Link>
         </>

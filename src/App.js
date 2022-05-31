@@ -15,6 +15,8 @@ import CreateProposal from './components/CreateProposal';
 import EditProposal from './components/EditProposal';
 import Proposals from './components/Proposals';
 import Wallets from './components/Wallets';
+import CreateTransaction from './components/CreateTransaction';
+import Transactions from './components/Transactions';
 import './App.css';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -24,6 +26,8 @@ function App() {
 
   const Routes = () =>
     useRoutes([
+      { path: '/wallet/:wallet/create-transaction', element: <CreateTransaction /> },
+      { path: '/wallet/:wallet/transactions', element: <Transactions /> },
       { path: '/create-wallet/adding', element: <CreateWallet /> },
       { path: '/create-wallet/creating', element: <CreateWallet /> },
       { path: '/create-wallet', element: <CreateWallet /> },

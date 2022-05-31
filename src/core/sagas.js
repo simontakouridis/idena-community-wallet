@@ -21,7 +21,8 @@ import {
   activateWallet,
   postNewProposal,
   editProposal,
-  deleteProposal
+  deleteProposal,
+  getWalletTransactions
 } from './api';
 import { getAuthLocalStorage, setAuthLocalStorage, removeAuthLocalStorage } from './utilities';
 import { appConfigurations } from './../core/constants';
@@ -341,6 +342,20 @@ function* deleteProposalSaga(action) {
   }
 }
 
+function* getWalletTransactionsSaga(action) {
+  try {
+    const {
+      payload: { walletId }
+    } = action;
+    const walletTransactions = yield call(getWalletTransactions, { wallet: walletId });
+
+    yield put({ type: actionNames[generalSliceName].updateWalletTransactions, payload: { walletId, walletTransactions } });
+  } catch (e) {
+    console.error(e);
+    toast('Error getting wallet transactions');
+  }
+}
+
 function* appRootSaga() {
   yield takeLatest(actionNames.processLogin, processLogin);
   yield takeLatest(actionNames.processlogout, processlogout);
@@ -356,6 +371,7 @@ function* appRootSaga() {
   yield takeLeading(actionNames.createProposal, createProposalSaga);
   yield takeLeading(actionNames.editProposal, editProposalSaga);
   yield takeLeading(actionNames.deleteProposal, deleteProposalSaga);
+  yield takeLeading(actionNames.getWalletTransactions, getWalletTransactionsSaga);
 }
 
 export default appRootSaga;

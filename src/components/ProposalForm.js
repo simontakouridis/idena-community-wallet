@@ -64,7 +64,9 @@ function ProposalForm({ proposal }) {
   };
 
   const deleteProposal = () => {
-    dispatch({ type: actionNames.deleteProposal, payload: { proposalId: newEditedProposal.id } });
+    if (window.confirm('Are you sure you want to delete this proposal?')) {
+      dispatch({ type: actionNames.deleteProposal, payload: { proposalId: newEditedProposal.id } });
+    }
   };
 
   const resetProposal = () => {

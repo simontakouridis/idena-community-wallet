@@ -168,3 +168,11 @@ export function* deleteProposal(proposalId) {
     throw new Error('Error deleting proposal');
   }
 }
+
+export function* getWalletTransactions(params) {
+  const loginResponse = yield call(axios.get, `${appConfigurations.apiBaseUrl}/governance/transactions`, { params });
+  if (loginResponse?.status !== 200 || !loginResponse?.data?.results) {
+    throw new Error('Error getting wallet transactions');
+  }
+  return loginResponse.data.results;
+}

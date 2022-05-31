@@ -7,6 +7,12 @@ import { truncateAddress } from './../core/utilities';
 import loadingSvg from './../assets/loading.svg';
 import './CreateWallet.css';
 
+const doNotCloseReloadBrowser = (
+  <span>
+    <b>DO NOT CLOSE OR RELOAD BROWSER!</b>
+  </span>
+);
+
 function CreateWallet() {
   const dispatch = useDispatch();
   const location = useLocation();
@@ -60,11 +66,15 @@ function CreateWallet() {
   };
 
   const deleteDraftWallet = async () => {
-    dispatch({ type: actionNames.deleteDraftWallet, payload: { draftWallet } });
+    if (window.confirm('Are you sure you want to delete this draft wallet?')) {
+      dispatch({ type: actionNames.deleteDraftWallet, payload: { draftWallet } });
+    }
   };
 
   const activateDraftWallet = async () => {
-    dispatch({ type: actionNames.activateDraftWallet, payload: { draftWallet } });
+    if (window.confirm('Are you sure you want to activate this draft wallet? It will create also create a new round!')) {
+      dispatch({ type: actionNames.activateDraftWallet, payload: { draftWallet } });
+    }
   };
 
   const addSignerToDraftWallet = async () => {
@@ -82,6 +92,7 @@ function CreateWallet() {
         {isCreatingWallet ? 'Creating Wallet...' : 'Create New Multisig Wallet'}
         {isCreatingWallet && <img className="loadingImg" src={loadingSvg} />}
       </button>
+      {isCreatingWallet && doNotCloseReloadBrowser}
       {draftWallet && (
         <div className="draftWalletContainer">
           <div>
@@ -120,6 +131,7 @@ function CreateWallet() {
               onChange={e => setSigner(e.target.value)}
               placeholder="New Signer Address"
             />
+            {isAddingSigner && doNotCloseReloadBrowser}
           </div>
           <div>
             <button onClick={() => deleteDraftWallet()} disabled={isDeletingWallet}>

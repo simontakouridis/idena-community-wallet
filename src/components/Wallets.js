@@ -38,14 +38,8 @@ function Wallets() {
             ))}
           </div>
           <div>
-            <b>Transactions:</b>
-            <div>
-              <a href="#">Create Transaction</a>
-            </div>
+            <Link to={`/wallet/${wallet.id}/transactions`}>{wallet.transactions?.length ?? 0} transactions</Link>
           </div>
-          {wallet?.transactions.map(transaction => (
-            <div key={transaction}>{transaction}</div>
-          ))}
         </div>
       ))}
     </>
