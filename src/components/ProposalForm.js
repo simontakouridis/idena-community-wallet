@@ -2,8 +2,18 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { isValidAddress } from 'ethereumjs-util';
 import { actionNames } from '../core/constants';
+import { arrayDuplicates } from '../core/utilities';
 import loadingSvg from './../assets/loading.svg';
 import './ProposalForm.css';
+
+const newProposal = {
+  title: '',
+  description: '',
+  oracle: '',
+  acceptanceStatus: '',
+  fundingStatus: '',
+  transactions: []
+};
 
 function ProposalForm({ proposal }) {
   const dispatch = useDispatch();
@@ -13,20 +23,13 @@ function ProposalForm({ proposal }) {
   const isDeletingProposal = useSelector(state => state.general.loaders.deletingProposal);
 
   const [isCurrentDelegate, setIsCurrentDelegate] = useState(false);
-  const [newEditedProposal, setNewEditedProposal] = useState({
-    title: '',
-    description: '',
-    oracle: '',
-    acceptanceStatus: '',
-    fundingStatus: '',
-    transaction: ''
-  });
+  const [newEditedProposal, setNewEditedProposal] = useState(newProposal);
 
   useEffect(() => {
     if (!proposal) {
       return;
     }
-    setNewEditedProposal({ ...newEditedProposal, ...proposal });
+    setNewEditedProposal({ ...newProposal, ...proposal });
   }, [proposal]);
 
   useEffect(() => {
@@ -47,8 +50,13 @@ function ProposalForm({ proposal }) {
       return;
     }
 
-    if (newEditedProposal.transaction && !/^\d{24}$/.test(newEditedProposal.transaction)) {
-      alert('Transaction Id must be 24 digits!');
+    if (newEditedProposal.transactions.some(transaction => !/^[a-z0-9]{24}$/.test(transaction))) {
+      alert('Transaction Ids must be of 24 digits!');
+      return;
+    }
+
+    if (newEditedProposal.transactions.length && arrayDuplicates(newEditedProposal.transactions)) {
+      alert('Transaction Ids cannot be duplicated!');
       return;
     }
 
@@ -57,6 +65,10 @@ function ProposalForm({ proposal }) {
 
   const deleteProposal = () => {
     dispatch({ type: actionNames.deleteProposal, payload: { proposalId: newEditedProposal.id } });
+  };
+
+  const resetProposal = () => {
+    setNewEditedProposal(proposal ? { ...newProposal, ...proposal } : newProposal);
   };
 
   return (
@@ -115,24 +127,39 @@ function ProposalForm({ proposal }) {
         </select>
       </div>
       <div>
-        <span>Transaction Id:</span>
-        <input
-          disabled={!proposal}
-          value={newEditedProposal.transaction}
-          onChange={e => setNewEditedProposal({ ...newEditedProposal, transaction: e.target.value })}
-          placeholder="Transaction Id"
-        />
+        <div>Associated Transactions:</div>
+        {newEditedProposal.transactions.map((transaction, i) => (
+          <div key={i}>
+            <input
+              disabled={!proposal}
+              value={transaction}
+              onChange={e =>
+                setNewEditedProposal({ ...newEditedProposal, transactions: newEditedProposal.transactions.map((tx, j) => (j === i ? e.target.value : tx)) })
+              }
+              placeholder="Transaction Id"
+            />
+            <button onClick={() => setNewEditedProposal({ ...newEditedProposal, transactions: newEditedProposal.transactions.filter((tx, j) => j !== i) })}>
+              Remove
+            </button>
+          </div>
+        ))}
+        <button disabled={!proposal} onClick={() => setNewEditedProposal({ ...newEditedProposal, transactions: [...newEditedProposal.transactions, ''] })}>
+          Add Transaction
+        </button>
       </div>
-      <button onClick={() => createEditProposal()} disabled={!isCurrentDelegate}>
+      <button onClick={() => createEditProposal()} disabled={!isCurrentDelegate || isCreatingEditingProposal || isDeletingProposal}>
         {isCreatingEditingProposal ? (proposal ? 'Editing Proposal...' : 'Creating Proposal...') : proposal ? 'Edit Proposal' : 'Create New Proposal'}
         {isCreatingEditingProposal && <img className="loadingImg" src={loadingSvg} />}
       </button>
       {proposal && (
-        <button onClick={() => deleteProposal()} disabled={!isCurrentDelegate}>
+        <button onClick={() => deleteProposal()} disabled={!isCurrentDelegate || isCreatingEditingProposal || isDeletingProposal}>
           {isDeletingProposal ? 'Deleting Proposal' : 'Delete Proposal'}
           {isDeletingProposal && <img className="loadingImg" src={loadingSvg} />}
         </button>
       )}
+      <button onClick={() => resetProposal()} disabled={!isCurrentDelegate || isCreatingEditingProposal || isDeletingProposal}>
+        Reset
+      </button>
     </div>
   );
 }

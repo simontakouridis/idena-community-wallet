@@ -313,7 +313,7 @@ function* editProposalSaga(action) {
       ...(newEditedProposal.oracle && { oracle: newEditedProposal.oracle }),
       ...(newEditedProposal.acceptanceStatus && { acceptanceStatus: newEditedProposal.acceptanceStatus }),
       ...(newEditedProposal.fundingStatus && { fundingStatus: newEditedProposal.fundingStatus }),
-      ...(newEditedProposal.transaction && { transaction: newEditedProposal.transaction })
+      ...(newEditedProposal.transactions.length && { transactions: newEditedProposal.transactions })
     };
 
     yield call(editProposal, newEditedProposal.id, requestBody);
