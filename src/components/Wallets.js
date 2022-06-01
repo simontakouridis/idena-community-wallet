@@ -38,7 +38,7 @@ function Wallets() {
             ))}
           </div>
           <div>
-            <Link to={`/wallet/${wallet.id}/transactions`}>{wallet.transactions?.length ?? 0} transactions</Link>
+            <b>Transactions:</b> <Link to={`/wallet/${wallet.id}/transactions`}>{wallet.transactions?.length ?? 0} transactions</Link>
           </div>
         </div>
       ))}

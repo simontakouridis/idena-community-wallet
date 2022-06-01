@@ -169,10 +169,33 @@ export function* deleteProposal(proposalId) {
   }
 }
 
+export function* getWalletDraftTransactions(params) {
+  const loginResponse = yield call(axios.get, `${appConfigurations.apiBaseUrl}/governance/draft-transactions`, { params });
+  if (loginResponse?.status !== 200 || !loginResponse?.data?.results) {
+    throw new Error('Error getting wallet draft transactions');
+  }
+  return loginResponse.data.results;
+}
+
 export function* getWalletTransactions(params) {
   const loginResponse = yield call(axios.get, `${appConfigurations.apiBaseUrl}/governance/transactions`, { params });
   if (loginResponse?.status !== 200 || !loginResponse?.data?.results) {
     throw new Error('Error getting wallet transactions');
   }
   return loginResponse.data.results;
+}
+
+export function* postNewTransaction(body) {
+  const response = yield call(axios.post, `${appConfigurations.apiBaseUrl}/governance/create-draft-transaction`, body);
+  if (response?.status !== 201 || !response?.data) {
+    throw new Error('Error posting new draft transaction');
+  }
+  return response.data;
+}
+
+export function* deleteDraftTransaction(transactionId) {
+  const loginResponse = yield call(axios.delete, `${appConfigurations.apiBaseUrl}/governance/transactions/${transactionId}`);
+  if (loginResponse?.status !== 204) {
+    throw new Error('Error deleting transaction');
+  }
 }

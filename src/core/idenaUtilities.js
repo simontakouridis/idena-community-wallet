@@ -200,8 +200,26 @@ export function getDeployMultisigPayload(maxVotes, minVotes) {
   return new DeployContractAttachment(codeHashBytes, argSlice);
 }
 
-export function getAddSignerPayload(address) {
+export function getMultisigAddSignerPayload(address) {
   const args = [{ index: 0, format: 'hex', value: address }];
   const argSlice = argsToSlice(args);
   return new CallContractAttachment('add', argSlice);
+}
+
+export function getMultisigSendPayload(recipient, amount) {
+  const args = [
+    { index: 0, format: 'hex', value: recipient },
+    { index: 0, format: 'byte', value: amount }
+  ];
+  const argSlice = argsToSlice(args);
+  return new CallContractAttachment('send', argSlice);
+}
+
+export function getMultisigPushPayload(recipient, amount) {
+  const args = [
+    { index: 0, format: 'hex', value: recipient },
+    { index: 0, format: 'byte', value: amount }
+  ];
+  const argSlice = argsToSlice(args);
+  return new CallContractAttachment('push', argSlice);
 }

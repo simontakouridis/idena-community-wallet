@@ -22,11 +22,14 @@ import {
   postNewProposal,
   editProposal,
   deleteProposal,
-  getWalletTransactions
+  getWalletDraftTransactions,
+  getWalletTransactions,
+  postNewTransaction,
+  deleteDraftTransaction
 } from './api';
 import { getAuthLocalStorage, setAuthLocalStorage, removeAuthLocalStorage } from './utilities';
 import { appConfigurations } from './../core/constants';
-import { getDeployMultisigPayload, getAddSignerPayload } from './../core/idenaUtilities';
+import { getDeployMultisigPayload, getMultisigAddSignerPayload, getMultisigSendPayload, getMultisigPushPayload } from './../core/idenaUtilities';
 import { Transaction } from './idenaTransaction';
 
 function* processLogin({ payload: idenaAuthToken }) {
@@ -97,7 +100,7 @@ function* createMultisigWallet(action) {
     yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'creatingWallet', loading: true } });
     const { nonce, epoch } = yield call(getNonceAndEpoch, user.address);
     const multisigPayload = getDeployMultisigPayload('5', '3');
-    const tx = new Transaction(nonce, epoch, 0xf, '', 4 * 10 ** 18, 0.1 * 10 ** 18, 0, multisigPayload.toBytes());
+    const tx = new Transaction(nonce, epoch, 0xf, '', 3 * 10 ** 18, 0.1 * 10 ** 18, 0, multisigPayload.toBytes());
     const unsignedRawTx = '0x' + tx.toHex();
     const params = new URLSearchParams({
       tx: unsignedRawTx,
@@ -188,8 +191,8 @@ function* addSignerToDraftWallet(action) {
     } = action;
     yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'addingSigner', loading: true } });
     const { nonce, epoch } = yield call(getNonceAndEpoch, user.address);
-    const addSignerPayload = getAddSignerPayload(signer);
-    const tx = new Transaction(nonce, epoch, 0x10, draftWallet.address, 4 * 10 ** 18, 0.1 * 10 ** 18, 0, addSignerPayload.toBytes());
+    const addSignerPayload = getMultisigAddSignerPayload(signer);
+    const tx = new Transaction(nonce, epoch, 0x10, draftWallet.address, 3 * 10 ** 18, 0.1 * 10 ** 18, 0, addSignerPayload.toBytes());
     const unsignedRawTx = '0x' + tx.toHex();
     const params = new URLSearchParams({
       tx: unsignedRawTx,
@@ -342,6 +345,24 @@ function* deleteProposalSaga(action) {
   }
 }
 
+function* getWalletDraftTransactionsSaga(action) {
+  try {
+    const {
+      payload: { walletId }
+    } = action;
+    const walletDraftTransactionsData = yield call(getWalletDraftTransactions, { wallet: walletId });
+    const walletDraftTransaction = walletDraftTransactionsData?.[0];
+    if (!walletDraftTransaction) {
+      return;
+    }
+
+    yield put({ type: actionNames[generalSliceName].updateWalletDraftTransactions, payload: { walletId, walletDraftTransaction } });
+  } catch (e) {
+    console.error(e);
+    toast('Error getting wallet draft transaction');
+  }
+}
+
 function* getWalletTransactionsSaga(action) {
   try {
     const {
@@ -353,6 +374,99 @@ function* getWalletTransactionsSaga(action) {
   } catch (e) {
     console.error(e);
     toast('Error getting wallet transactions');
+  }
+}
+
+function* createDraftTransactionSaga(action) {
+  try {
+    const {
+      payload: { wallet, newTransaction }
+    } = action;
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'creatingTransaction', loading: true } });
+
+    yield call(postNewTransaction, {
+      title: newTransaction.title,
+      category: newTransaction.category,
+      ...(newTransaction.category === 'fundProposal' && { proposal: newTransaction.proposal }),
+      ...(newTransaction.category === 'other' && { categoryOtherDescription: newTransaction.otherDescription }),
+      wallet: wallet.id,
+      recipient: newTransaction.recipient,
+      amount: newTransaction.amount
+    });
+    location.reload();
+  } catch (e) {
+    console.error(e);
+  } finally {
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'creatingTransaction', loading: false } });
+  }
+}
+
+function* signDraftTransactionSaga(action) {
+  try {
+    const {
+      payload: { user, wallet, draftTransaction }
+    } = action;
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'creatingTransaction', loading: true } });
+
+    const { nonce, epoch } = yield call(getNonceAndEpoch, user.address);
+    const multisigSendPayload = getMultisigSendPayload(draftTransaction.recipient, `${draftTransaction.amount}`);
+
+    const tx = new Transaction(nonce, epoch, 0x10, wallet.address, 3 * 10 ** 18, 0.1 * 10 ** 18, 0, multisigSendPayload.toBytes());
+    const unsignedRawTx = '0x' + tx.toHex();
+    const params = new URLSearchParams({
+      tx: unsignedRawTx,
+      callback_format: 'html',
+      callback_url: encodeURIComponent(`${appConfigurations.localBaseUrl}/wallet/${wallet.id}/create-transaction/sending`)
+    });
+    window.location.href = `${appConfigurations.idenaRawTxUrl}?` + params.toString();
+
+    // add sender to backend once tx confirmed...
+  } catch (e) {
+    console.error(e);
+  } finally {
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'creatingTransaction', loading: false } });
+  }
+}
+
+function* deleteDraftTransactionSaga(action) {
+  try {
+    const {
+      payload: { draftTransaction }
+    } = action;
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'deletingTransaction', loading: true } });
+    yield call(deleteDraftTransaction, draftTransaction.id);
+    location.reload();
+  } catch (e) {
+    console.error(e);
+  } finally {
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'deletingTransaction', loading: false } });
+  }
+}
+
+function* executeDraftTransactionSaga(action) {
+  try {
+    const {
+      payload: { user, wallet, newTransaction }
+    } = action;
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'executeDraftTransaction', loading: true } });
+
+    const { nonce, epoch } = yield call(getNonceAndEpoch, user.address);
+    const multisigPushPayload = getMultisigPushPayload(newTransaction.recipient, `${newTransaction.amount}`);
+
+    const tx = new Transaction(nonce, epoch, 0x10, wallet.address, 3 * 10 ** 18, 0.1 * 10 ** 18, 0, multisigPushPayload.toBytes());
+    const unsignedRawTx = '0x' + tx.toHex();
+    const params = new URLSearchParams({
+      tx: unsignedRawTx,
+      callback_format: 'html',
+      callback_url: encodeURIComponent(`${appConfigurations.localBaseUrl}/wallet/${wallet.id}/create-transaction/executing`)
+    });
+    window.location.href = `${appConfigurations.idenaRawTxUrl}?` + params.toString();
+
+    // add pusher and confirm tx to backend once tx executed.
+  } catch (e) {
+    console.error(e);
+  } finally {
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'executeDraftTransaction', loading: false } });
   }
 }
 
@@ -371,7 +485,12 @@ function* appRootSaga() {
   yield takeLeading(actionNames.createProposal, createProposalSaga);
   yield takeLeading(actionNames.editProposal, editProposalSaga);
   yield takeLeading(actionNames.deleteProposal, deleteProposalSaga);
+  yield takeLeading(actionNames.getWalletDraftTransactions, getWalletDraftTransactionsSaga);
   yield takeLeading(actionNames.getWalletTransactions, getWalletTransactionsSaga);
+  yield takeLeading(actionNames.createDraftTransaction, createDraftTransactionSaga);
+  yield takeLeading(actionNames.signDraftTransaction, signDraftTransactionSaga);
+  yield takeLeading(actionNames.deleteDraftTransaction, deleteDraftTransactionSaga);
+  yield takeLeading(actionNames.executeDraftTransaction, executeDraftTransactionSaga);
 }
 
 export default appRootSaga;

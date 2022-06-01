@@ -121,12 +121,15 @@ function CreateWallet() {
             </div>
           </div>
           <div>
-            <button disabled={draftWallet.signers.length >= 5 || isAddingSigner} onClick={() => addSignerToDraftWallet()}>
+            <button
+              disabled={draftWallet.signers.length >= 5 || isAddingSigner || isDeletingWallet || isActivatingWallet}
+              onClick={() => addSignerToDraftWallet()}
+            >
               {isAddingSigner ? 'Adding Signer...' : 'Add Signer'}
               {isAddingSigner && <img className="loadingImg" src={loadingSvg} />}
             </button>
             <input
-              disabled={draftWallet.signers.length >= 5 || isAddingSigner}
+              disabled={draftWallet.signers.length >= 5 || isAddingSigner || isDeletingWallet || isActivatingWallet}
               value={signer}
               onChange={e => setSigner(e.target.value)}
               placeholder="New Signer Address"
@@ -134,11 +137,11 @@ function CreateWallet() {
             {isAddingSigner && doNotCloseReloadBrowser}
           </div>
           <div>
-            <button onClick={() => deleteDraftWallet()} disabled={isDeletingWallet}>
+            <button onClick={() => deleteDraftWallet()} disabled={isAddingSigner || isDeletingWallet || isActivatingWallet}>
               {isDeletingWallet ? 'Deleting Wallet...' : 'Delete Draft Wallet'}
               {isDeletingWallet && <img className="loadingImg" src={loadingSvg} />}
             </button>
-            <button disabled={draftWallet.signers.length < 5 || isActivatingWallet} onClick={() => activateDraftWallet()}>
+            <button disabled={draftWallet.signers.length < 5 || isAddingSigner || isDeletingWallet || isActivatingWallet} onClick={() => activateDraftWallet()}>
               {isActivatingWallet ? 'Activating Wallet...' : 'Activate Draft Wallet'}
               {isActivatingWallet && <img className="loadingImg" src={loadingSvg} />}
             </button>

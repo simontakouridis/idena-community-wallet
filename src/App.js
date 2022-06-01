@@ -17,6 +17,7 @@ import Proposals from './components/Proposals';
 import Wallets from './components/Wallets';
 import CreateTransaction from './components/CreateTransaction';
 import Transactions from './components/Transactions';
+import Terms from './components/Terms';
 import './App.css';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -37,6 +38,7 @@ function App() {
       { path: '/proposals/:proposal/edit', element: <EditProposal /> },
       { path: '/proposals', element: <Proposals /> },
       { path: '/wallets', element: <Wallets /> },
+      { path: '/terms-of-service', element: <Terms /> },
       { path: '/', element: <Home /> }
     ]);
 

@@ -19,10 +19,15 @@ const generalSlice = createSlice({
       addingSigner: false,
       activatingWallet: false,
       creatingEditingProposal: false,
-      deletingProposal: false
+      deletingProposal: false,
+      creatingTransaction: false,
+      signingTransaction: false,
+      deletingTransaction: false,
+      executingTransaction: false
     },
     draftWallet: null,
     walletsCreated: [],
+    walletDraftTransactions: {},
     walletTransactions: {}
   },
   reducers: {
@@ -60,6 +65,9 @@ const generalSlice = createSlice({
     addNewSignerToDraftWallet: (state, action) => {
       state.draftWallet?.signers?.push(action.payload);
     },
+    updateWalletDraftTransactions: (state, action) => {
+      state.walletDraftTransactions[action.payload.walletId] = action.payload.walletDraftTransaction;
+    },
     updateWalletTransactions: (state, action) => {
       state.walletTransactions[action.payload.walletId] = action.payload.walletTransactions;
     }
@@ -78,6 +86,7 @@ export const {
   clearDraftWallet,
   updateWalletsCreated,
   addNewSignerToDraftWallet,
+  updateWalletDraftTransactions,
   updateWalletTransactions
 } = actions;
 

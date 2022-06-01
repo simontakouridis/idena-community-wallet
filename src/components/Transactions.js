@@ -13,6 +13,7 @@ function Transactions() {
 
   const [walletTransactions, setWalletTransactions] = useState([]);
   const [wallet, setWallet] = useState(null);
+  const [isWalletSigner, setIsWalletSigner] = useState(false);
 
   useEffect(() => {
     dispatch({ type: actionNames.getWalletTransactions, payload: { walletId } });
@@ -22,7 +23,7 @@ function Transactions() {
     if (!walletTransactionsObj[walletId]?.length) {
       return;
     }
-    setWalletTransactions(walletTransactionsObj[walletId].filter(transaction => !!transaction.push));
+    setWalletTransactions(walletTransactionsObj[walletId]);
   }, [walletTransactionsObj]);
 
   useEffect(() => {
@@ -32,12 +33,19 @@ function Transactions() {
     setWallet(wallets.find(wallet => wallet.id === walletId));
   }, [wallets]);
 
+  useEffect(() => {
+    if (!wallet || !user) {
+      return;
+    }
+    setIsWalletSigner(wallet.signers.includes(user.address));
+  }, [wallet, user]);
+
   return (
     <div className={'Transactions'}>
       <h2>Transactions</h2>
       <div>
         <b>Transactions:</b>
-        {wallet?.signers?.includes(user?.address) && (
+        {isWalletSigner && (
           <div>
             <Link to={`/wallet/${walletId}/create-transaction`}>Create Transaction</Link>
           </div>
