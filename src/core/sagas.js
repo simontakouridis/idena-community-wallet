@@ -25,6 +25,8 @@ import {
   getWalletDraftTransactions,
   getWalletTransactions,
   postNewTransaction,
+  signDraftTransaction,
+  executeDraftTransaction,
   deleteDraftTransaction
 } from './api';
 import { getAuthLocalStorage, setAuthLocalStorage, removeAuthLocalStorage } from './utilities';
@@ -100,7 +102,7 @@ function* createMultisigWallet(action) {
     yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'creatingWallet', loading: true } });
     const { nonce, epoch } = yield call(getNonceAndEpoch, user.address);
     const multisigPayload = getDeployMultisigPayload('5', '3');
-    const tx = new Transaction(nonce, epoch, 0xf, '', 3 * 10 ** 18, 0.1 * 10 ** 18, 0, multisigPayload.toBytes());
+    const tx = new Transaction(nonce, epoch, 0xf, '', 4 * 10 ** 18, 0.1 * 10 ** 18, 0, multisigPayload.toBytes());
     const unsignedRawTx = '0x' + tx.toHex();
     const params = new URLSearchParams({
       tx: unsignedRawTx,
@@ -121,7 +123,7 @@ function* creatingMultisigWallet(action) {
     } = action;
 
     yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'creatingWallet', loading: true } });
-    const txReceipt = yield call(getNewTransactionRecipt, tx, 'DeployContract', user.address);
+    const txReceipt = yield call(getNewTransactionReceipt, tx, 'DeployContract', user.address);
     const contract = txReceipt?.contractAddress.toLowerCase();
 
     if (!contract) {
@@ -192,7 +194,7 @@ function* addSignerToDraftWallet(action) {
     yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'addingSigner', loading: true } });
     const { nonce, epoch } = yield call(getNonceAndEpoch, user.address);
     const addSignerPayload = getMultisigAddSignerPayload(signer);
-    const tx = new Transaction(nonce, epoch, 0x10, draftWallet.address, 3 * 10 ** 18, 0.1 * 10 ** 18, 0, addSignerPayload.toBytes());
+    const tx = new Transaction(nonce, epoch, 0x10, draftWallet.address, 1 * 10 ** 18, 0.1 * 10 ** 18, 0, addSignerPayload.toBytes());
     const unsignedRawTx = '0x' + tx.toHex();
     const params = new URLSearchParams({
       tx: unsignedRawTx,
@@ -217,12 +219,13 @@ function* addingSignerToMultisigWallet(action) {
     } = action;
 
     yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'addingSigner', loading: true } });
-    const txReceipt = yield call(getNewTransactionRecipt, tx, 'CallContract', user.address);
+    const txReceipt = yield call(getNewTransactionReceipt, tx, 'CallContract', user.address);
     const contract = txReceipt?.contractAddress.toLowerCase();
     const method = txReceipt?.method;
+    const success = txReceipt?.success;
 
-    if (!contract || method !== 'add') {
-      throw new Error('Something went wrong with adding signer.');
+    if (!contract || method !== 'add' || !success) {
+      throw new Error(`Something went wrong with adding signer. ${txReceipt?.errorMsg}`);
     }
     const multisigContractData = yield call(getMultisigContract, contract);
     if (!multisigContractData?.signers) {
@@ -263,7 +266,7 @@ function* getNonceAndEpoch(userAddress) {
   return { nonce, epoch };
 }
 
-function* getNewTransactionRecipt(tx, txType, userAddress) {
+function* getNewTransactionReceipt(tx, txType, userAddress) {
   let txReceipt;
   const iterations = 24;
   const delayPerIteration = 5000;
@@ -406,25 +409,100 @@ function* signDraftTransactionSaga(action) {
     const {
       payload: { user, wallet, draftTransaction }
     } = action;
-    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'creatingTransaction', loading: true } });
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'signingTransaction', loading: true } });
 
     const { nonce, epoch } = yield call(getNonceAndEpoch, user.address);
-    const multisigSendPayload = getMultisigSendPayload(draftTransaction.recipient, `${draftTransaction.amount}`);
+    const multisigSendPayload = getMultisigSendPayload(draftTransaction.recipient, draftTransaction.amount);
 
-    const tx = new Transaction(nonce, epoch, 0x10, wallet.address, 3 * 10 ** 18, 0.1 * 10 ** 18, 0, multisigSendPayload.toBytes());
+    const tx = new Transaction(nonce, epoch, 0x10, wallet.address, 1 * 10 ** 18, 0.1 * 10 ** 18, 0, multisigSendPayload.toBytes());
     const unsignedRawTx = '0x' + tx.toHex();
     const params = new URLSearchParams({
       tx: unsignedRawTx,
       callback_format: 'html',
-      callback_url: encodeURIComponent(`${appConfigurations.localBaseUrl}/wallet/${wallet.id}/create-transaction/sending`)
+      callback_url: encodeURIComponent(`${appConfigurations.localBaseUrl}/wallet/${wallet.id}/create-transaction/signing`)
     });
     window.location.href = `${appConfigurations.idenaRawTxUrl}?` + params.toString();
-
-    // add sender to backend once tx confirmed...
   } catch (e) {
     console.error(e);
   } finally {
-    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'creatingTransaction', loading: false } });
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'signingTransaction', loading: false } });
+  }
+}
+
+function* signingDraftTransactionSaga(action) {
+  try {
+    const {
+      payload: { tx, user, wallet, draftTransaction }
+    } = action;
+
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'signingTransaction', loading: true } });
+    const txReceipt = yield call(getNewTransactionReceipt, tx, 'CallContract', user.address);
+    const contract = txReceipt?.contractAddress.toLowerCase();
+    const method = txReceipt?.method;
+    const success = txReceipt?.success;
+
+    if (!contract || method !== 'send' || !success) {
+      throw new Error(`Something went wrong with signing transaction. ${txReceipt?.errorMsg}`);
+    }
+
+    yield call(signDraftTransaction, { transaction: draftTransaction.id });
+    window.location.href = `${appConfigurations.localBaseUrl}/wallet/${wallet.id}/create-transaction`;
+  } catch (e) {
+    console.error(e);
+    toast('Error signing transaction');
+  } finally {
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'signingTransaction', loading: false } });
+  }
+}
+
+function* executeDraftTransactionSaga(action) {
+  try {
+    const {
+      payload: { user, wallet, draftTransaction }
+    } = action;
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'executingTransaction', loading: true } });
+
+    const { nonce, epoch } = yield call(getNonceAndEpoch, user.address);
+    const multisigPushPayload = getMultisigPushPayload(draftTransaction.recipient, draftTransaction.amount);
+
+    const tx = new Transaction(nonce, epoch, 0x10, wallet.address, 1 * 10 ** 18, 0.1 * 10 ** 18, 0, multisigPushPayload.toBytes());
+    const unsignedRawTx = '0x' + tx.toHex();
+    const params = new URLSearchParams({
+      tx: unsignedRawTx,
+      callback_format: 'html',
+      callback_url: encodeURIComponent(`${appConfigurations.localBaseUrl}/wallet/${wallet.id}/create-transaction/executing`)
+    });
+    window.location.href = `${appConfigurations.idenaRawTxUrl}?` + params.toString();
+  } catch (e) {
+    console.error(e);
+  } finally {
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'executingTransaction', loading: false } });
+  }
+}
+
+function* executingDraftTransactionSaga(action) {
+  try {
+    const {
+      payload: { tx, user, wallet, draftTransaction }
+    } = action;
+
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'executingTransaction', loading: true } });
+    const txReceipt = yield call(getNewTransactionReceipt, tx, 'CallContract', user.address);
+    const contract = txReceipt?.contractAddress.toLowerCase();
+    const method = txReceipt?.method;
+    const success = txReceipt?.success;
+
+    if (!contract || method !== 'push' || !success) {
+      throw new Error(`Something went wrong with executing transaction. ${txReceipt?.errorMsg}`);
+    }
+
+    yield call(executeDraftTransaction, draftTransaction.id);
+    window.location.href = `${appConfigurations.localBaseUrl}/wallet/${wallet.id}/transactions`;
+  } catch (e) {
+    console.error(e);
+    toast('Error executing transaction');
+  } finally {
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'executingTransaction', loading: false } });
   }
 }
 
@@ -440,33 +518,6 @@ function* deleteDraftTransactionSaga(action) {
     console.error(e);
   } finally {
     yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'deletingTransaction', loading: false } });
-  }
-}
-
-function* executeDraftTransactionSaga(action) {
-  try {
-    const {
-      payload: { user, wallet, newTransaction }
-    } = action;
-    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'executeDraftTransaction', loading: true } });
-
-    const { nonce, epoch } = yield call(getNonceAndEpoch, user.address);
-    const multisigPushPayload = getMultisigPushPayload(newTransaction.recipient, `${newTransaction.amount}`);
-
-    const tx = new Transaction(nonce, epoch, 0x10, wallet.address, 3 * 10 ** 18, 0.1 * 10 ** 18, 0, multisigPushPayload.toBytes());
-    const unsignedRawTx = '0x' + tx.toHex();
-    const params = new URLSearchParams({
-      tx: unsignedRawTx,
-      callback_format: 'html',
-      callback_url: encodeURIComponent(`${appConfigurations.localBaseUrl}/wallet/${wallet.id}/create-transaction/executing`)
-    });
-    window.location.href = `${appConfigurations.idenaRawTxUrl}?` + params.toString();
-
-    // add pusher and confirm tx to backend once tx executed.
-  } catch (e) {
-    console.error(e);
-  } finally {
-    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'executeDraftTransaction', loading: false } });
   }
 }
 
@@ -489,8 +540,10 @@ function* appRootSaga() {
   yield takeLeading(actionNames.getWalletTransactions, getWalletTransactionsSaga);
   yield takeLeading(actionNames.createDraftTransaction, createDraftTransactionSaga);
   yield takeLeading(actionNames.signDraftTransaction, signDraftTransactionSaga);
-  yield takeLeading(actionNames.deleteDraftTransaction, deleteDraftTransactionSaga);
+  yield takeLeading(actionNames.signingDraftTransaction, signingDraftTransactionSaga);
   yield takeLeading(actionNames.executeDraftTransaction, executeDraftTransactionSaga);
+  yield takeLeading(actionNames.executingDraftTransaction, executingDraftTransactionSaga);
+  yield takeLeading(actionNames.deleteDraftTransaction, deleteDraftTransactionSaga);
 }
 
 export default appRootSaga;

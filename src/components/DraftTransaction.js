@@ -22,7 +22,7 @@ function DraftTransaction({ user, wallet, isWalletSigner, draftTransaction }) {
 
   const executeDraftTransaction = async () => {
     if (window.confirm('Are you sure you want to execute on this transaction? It will irreversibly send the funds!')) {
-      dispatch({ type: actionNames.executeTransactionn, payload: { draftTransaction } });
+      dispatch({ type: actionNames.executeDraftTransaction, payload: { user, wallet, draftTransaction } });
     }
   };
 
@@ -60,7 +60,7 @@ function DraftTransaction({ user, wallet, isWalletSigner, draftTransaction }) {
         <button
           onClick={() => signDraftTransaction()}
           disabled={
-            draftTransaction?.sends?.includes(user.address) || !isWalletSigner || isSigningTransaction || isDeletingTransaction || isExecutingTransaction
+            draftTransaction?.sends?.includes(user?.address) || !isWalletSigner || isSigningTransaction || isDeletingTransaction || isExecutingTransaction
           }
         >
           {isSigningTransaction ? 'Signing Transaction...' : 'Sign Transaction'}

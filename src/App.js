@@ -27,6 +27,8 @@ function App() {
 
   const Routes = () =>
     useRoutes([
+      { path: '/wallet/:wallet/create-transaction/executing', element: <CreateTransaction /> },
+      { path: '/wallet/:wallet/create-transaction/signing', element: <CreateTransaction /> },
       { path: '/wallet/:wallet/create-transaction', element: <CreateTransaction /> },
       { path: '/wallet/:wallet/transactions', element: <Transactions /> },
       { path: '/create-wallet/adding', element: <CreateWallet /> },

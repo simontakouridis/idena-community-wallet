@@ -209,7 +209,7 @@ export function getMultisigAddSignerPayload(address) {
 export function getMultisigSendPayload(recipient, amount) {
   const args = [
     { index: 0, format: 'hex', value: recipient },
-    { index: 0, format: 'byte', value: amount }
+    { index: 1, format: 'dna', value: amount }
   ];
   const argSlice = argsToSlice(args);
   return new CallContractAttachment('send', argSlice);
@@ -218,7 +218,7 @@ export function getMultisigSendPayload(recipient, amount) {
 export function getMultisigPushPayload(recipient, amount) {
   const args = [
     { index: 0, format: 'hex', value: recipient },
-    { index: 0, format: 'byte', value: amount }
+    { index: 1, format: 'dna', value: amount }
   ];
   const argSlice = argsToSlice(args);
   return new CallContractAttachment('push', argSlice);

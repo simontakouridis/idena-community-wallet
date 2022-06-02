@@ -3,59 +3,59 @@ import { call } from 'redux-saga/effects';
 import { appConfigurations } from './constants';
 
 export function* idenaAuthTokenInit(idenaAuthToken) {
-  const loginResponse = yield call(axios.post, `${appConfigurations.apiBaseUrl}/auth/login`, { idenaAuthToken });
-  if (loginResponse?.status !== 200 || !loginResponse?.data?.tokens) {
+  const response = yield call(axios.post, `${appConfigurations.apiBaseUrl}/auth/login`, { idenaAuthToken });
+  if (response?.status !== 200 || !response?.data?.tokens) {
     throw new Error('Error logging into api');
   }
-  return loginResponse.data;
+  return response.data;
 }
 
 export function* logout(refreshToken) {
-  const loginResponse = yield call(axios.post, `${appConfigurations.apiBaseUrl}/auth/logout`, { refreshToken });
-  if (loginResponse?.status !== 204) {
+  const response = yield call(axios.post, `${appConfigurations.apiBaseUrl}/auth/logout`, { refreshToken });
+  if (response?.status !== 204) {
     throw new Error('Error logging out of api');
   }
-  return loginResponse.data.tokens;
+  return response.data.tokens;
 }
 
 export function* getTokens(refreshToken) {
-  const loginResponse = yield call(axios.post, `${appConfigurations.apiBaseUrl}/auth/refresh-tokens`, { refreshToken });
-  if (loginResponse?.status !== 200 || !loginResponse?.data?.access || !loginResponse?.data?.refresh) {
+  const response = yield call(axios.post, `${appConfigurations.apiBaseUrl}/auth/refresh-tokens`, { refreshToken });
+  if (response?.status !== 200 || !response?.data?.access || !response?.data?.refresh) {
     throw new Error('Error logging into api');
   }
-  return loginResponse.data;
+  return response.data;
 }
 
 export function* getUsers(params) {
-  const loginResponse = yield call(axios.get, `${appConfigurations.apiBaseUrl}/users`, { params });
-  if (loginResponse?.status !== 200 || !loginResponse?.data?.results) {
+  const response = yield call(axios.get, `${appConfigurations.apiBaseUrl}/users`, { params });
+  if (response?.status !== 200 || !response?.data?.results) {
     throw new Error('Error getting users');
   }
-  return loginResponse.data.results;
+  return response.data.results;
 }
 
 export function* getWallets(params) {
-  const loginResponse = yield call(axios.get, `${appConfigurations.apiBaseUrl}/governance/wallets`, { params });
-  if (loginResponse?.status !== 200 || !loginResponse?.data?.results) {
+  const response = yield call(axios.get, `${appConfigurations.apiBaseUrl}/governance/wallets`, { params });
+  if (response?.status !== 200 || !response?.data?.results) {
     throw new Error('Error getting wallets');
   }
-  return loginResponse.data.results;
+  return response.data.results;
 }
 
 export function* getProposals(params) {
-  const loginResponse = yield call(axios.get, `${appConfigurations.apiBaseUrl}/governance/proposals`, { params });
-  if (loginResponse?.status !== 200 || !loginResponse?.data?.results) {
+  const response = yield call(axios.get, `${appConfigurations.apiBaseUrl}/governance/proposals`, { params });
+  if (response?.status !== 200 || !response?.data?.results) {
     throw new Error('Error getting proposals');
   }
-  return loginResponse.data.results;
+  return response.data.results;
 }
 
 export function* getTransactions(params) {
-  const loginResponse = yield call(axios.get, `${appConfigurations.apiBaseUrl}/governance/transactions`, { params });
-  if (loginResponse?.status !== 200 || !loginResponse?.data?.results) {
+  const response = yield call(axios.get, `${appConfigurations.apiBaseUrl}/governance/transactions`, { params });
+  if (response?.status !== 200 || !response?.data?.results) {
     throw new Error('Error getting transactions');
   }
-  return loginResponse.data.results;
+  return response.data.results;
 }
 
 export function* getAddress(address) {
@@ -124,26 +124,26 @@ export function* postNewSigner(signer, contract) {
 }
 
 export function* getDraftWallets(params) {
-  const loginResponse = yield call(axios.get, `${appConfigurations.apiBaseUrl}/governance/draft-wallets`, { params });
-  if (loginResponse?.status !== 200 || !loginResponse?.data?.results) {
+  const response = yield call(axios.get, `${appConfigurations.apiBaseUrl}/governance/draft-wallets`, { params });
+  if (response?.status !== 200 || !response?.data?.results) {
     throw new Error('Error getting draft wallets');
   }
-  return loginResponse.data.results;
+  return response.data.results;
 }
 
 export function* deleteWallet(draftWallet) {
-  const loginResponse = yield call(axios.delete, `${appConfigurations.apiBaseUrl}/governance/draft-wallets/${draftWallet.id}`);
-  if (loginResponse?.status !== 204) {
+  const response = yield call(axios.delete, `${appConfigurations.apiBaseUrl}/governance/draft-wallets/${draftWallet.id}`);
+  if (response?.status !== 204) {
     throw new Error('Error deleting wallet');
   }
 }
 
 export function* activateWallet(draftWallet) {
-  const loginResponse = yield call(axios.patch, `${appConfigurations.apiBaseUrl}/governance/draft-wallets/${draftWallet.id}`);
-  if (loginResponse?.status !== 200) {
+  const response = yield call(axios.patch, `${appConfigurations.apiBaseUrl}/governance/draft-wallets/${draftWallet.id}`);
+  if (response?.status !== 200) {
     throw new Error('Error activating wallet');
   }
-  return loginResponse.data.results;
+  return response.data.results;
 }
 
 export function* postNewProposal(body) {
@@ -163,26 +163,26 @@ export function* editProposal(proposalId, body) {
 }
 
 export function* deleteProposal(proposalId) {
-  const loginResponse = yield call(axios.delete, `${appConfigurations.apiBaseUrl}/governance/proposals/${proposalId}`);
-  if (loginResponse?.status !== 204) {
+  const response = yield call(axios.delete, `${appConfigurations.apiBaseUrl}/governance/proposals/${proposalId}`);
+  if (response?.status !== 204) {
     throw new Error('Error deleting proposal');
   }
 }
 
 export function* getWalletDraftTransactions(params) {
-  const loginResponse = yield call(axios.get, `${appConfigurations.apiBaseUrl}/governance/draft-transactions`, { params });
-  if (loginResponse?.status !== 200 || !loginResponse?.data?.results) {
+  const response = yield call(axios.get, `${appConfigurations.apiBaseUrl}/governance/draft-transactions`, { params });
+  if (response?.status !== 200 || !response?.data?.results) {
     throw new Error('Error getting wallet draft transactions');
   }
-  return loginResponse.data.results;
+  return response.data.results;
 }
 
 export function* getWalletTransactions(params) {
-  const loginResponse = yield call(axios.get, `${appConfigurations.apiBaseUrl}/governance/transactions`, { params });
-  if (loginResponse?.status !== 200 || !loginResponse?.data?.results) {
+  const response = yield call(axios.get, `${appConfigurations.apiBaseUrl}/governance/transactions`, { params });
+  if (response?.status !== 200 || !response?.data?.results) {
     throw new Error('Error getting wallet transactions');
   }
-  return loginResponse.data.results;
+  return response.data.results;
 }
 
 export function* postNewTransaction(body) {
@@ -193,9 +193,23 @@ export function* postNewTransaction(body) {
   return response.data;
 }
 
-export function* deleteDraftTransaction(transactionId) {
-  const loginResponse = yield call(axios.delete, `${appConfigurations.apiBaseUrl}/governance/transactions/${transactionId}`);
-  if (loginResponse?.status !== 204) {
+export function* signDraftTransaction(body) {
+  const response = yield call(axios.post, `${appConfigurations.apiBaseUrl}/governance/sign-draft-transaction`, body);
+  if (response?.status !== 200) {
+    throw new Error('Error signing transaction');
+  }
+}
+
+export function* executeDraftTransaction(draftTransactionId) {
+  const response = yield call(axios.patch, `${appConfigurations.apiBaseUrl}/governance/draft-transactions/${draftTransactionId}`);
+  if (response?.status !== 200) {
+    throw new Error('Error executing transaction');
+  }
+}
+
+export function* deleteDraftTransaction(draftTransactionId) {
+  const response = yield call(axios.delete, `${appConfigurations.apiBaseUrl}/governance/draft-transactions/${draftTransactionId}`);
+  if (response?.status !== 204) {
     throw new Error('Error deleting transaction');
   }
 }

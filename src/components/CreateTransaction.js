@@ -42,6 +42,26 @@ function CreateTransaction() {
     setDraftTransaction(walletDraftTransactionsObj[walletId]);
   }, [walletDraftTransactionsObj]);
 
+  useEffect(() => {
+    if (!wallet || !user || !draftTransaction) {
+      return;
+    }
+    if (location.pathname.endsWith('/create-transaction/signing')) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tx = urlParams.get('tx');
+      if (tx) {
+        dispatch({ type: actionNames.signingDraftTransaction, payload: { tx, user, wallet, draftTransaction } });
+      }
+    }
+    if (location.pathname.endsWith('/create-transaction/executing')) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tx = urlParams.get('tx');
+      if (tx) {
+        dispatch({ type: actionNames.executingDraftTransaction, payload: { tx, user, wallet, draftTransaction } });
+      }
+    }
+  }, [wallet, user, draftTransaction]);
+
   return (
     <div className="CreateTransaction">
       <h2>Create Transaction</h2>
