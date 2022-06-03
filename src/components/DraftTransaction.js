@@ -1,6 +1,8 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { actionNames } from '../core/constants';
+import { doNotCloseReloadBrowser } from './commonComponents';
 import loadingSvg from './../assets/loading.svg';
+import './DraftTransaction.css';
 
 function DraftTransaction({ user, wallet, isWalletSigner, draftTransaction }) {
   const dispatch = useDispatch();
@@ -66,6 +68,7 @@ function DraftTransaction({ user, wallet, isWalletSigner, draftTransaction }) {
           {isSigningTransaction ? 'Signing Transaction...' : 'Sign Transaction'}
           {isSigningTransaction && <img className="loadingImg" src={loadingSvg} />}
         </button>
+        {isSigningTransaction && doNotCloseReloadBrowser}
       </div>
       <div>
         <button onClick={() => deleteDraftTransaction()} disabled={!isWalletSigner || isSigningTransaction || isDeletingTransaction || isExecutingTransaction}>
@@ -79,6 +82,7 @@ function DraftTransaction({ user, wallet, isWalletSigner, draftTransaction }) {
           {isExecutingTransaction ? 'Executing Transaction...' : 'Execute Transaction'}
           {isExecutingTransaction && <img className="loadingImg" src={loadingSvg} />}
         </button>
+        {isExecutingTransaction && doNotCloseReloadBrowser}
       </div>
     </div>
   );

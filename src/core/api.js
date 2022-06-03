@@ -99,14 +99,6 @@ export function* getContract(contract) {
   return response.data.result;
 }
 
-export function* getMultisigContract(contract) {
-  const response = yield call(axios.get, `${appConfigurations.idenaApiUrl}/MultisigContract/${contract}`);
-  if (response?.status !== 200 || !response?.data?.result) {
-    throw new Error('Error getting multisig contract data');
-  }
-  return response.data.result;
-}
-
 export function* postNewDraftWallet(address) {
   const response = yield call(axios.post, `${appConfigurations.apiBaseUrl}/governance/create-draft-wallet`, { address });
   if (response?.status !== 201 || !response?.data) {
@@ -200,8 +192,8 @@ export function* signDraftTransaction(body) {
   }
 }
 
-export function* executeDraftTransaction(draftTransactionId) {
-  const response = yield call(axios.patch, `${appConfigurations.apiBaseUrl}/governance/draft-transactions/${draftTransactionId}`);
+export function* executeDraftTransaction(draftTransactionId, body) {
+  const response = yield call(axios.patch, `${appConfigurations.apiBaseUrl}/governance/draft-transactions/${draftTransactionId}`, body);
   if (response?.status !== 200) {
     throw new Error('Error executing transaction');
   }

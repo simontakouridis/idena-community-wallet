@@ -32,7 +32,8 @@ function Wallets() {
             {wallet?.signers.map((signer, index, arr) => (
               <Link key={signer} to={`/delegates/${signer}`}>
                 <span>
-                  {truncateAddress(signer)} {index !== arr.length - 1 && ', '}
+                  {truncateAddress(signer)}
+                  {index !== arr.length - 1 && ', '}
                 </span>
               </Link>
             ))}

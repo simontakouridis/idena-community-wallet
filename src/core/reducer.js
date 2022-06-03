@@ -56,9 +56,6 @@ const generalSlice = createSlice({
     updateDraftWallet: (state, action) => {
       state.draftWallet = action.payload;
     },
-    clearDraftWallet: state => {
-      state.draftWallet = null;
-    },
     updateWalletsCreated: (state, action) => {
       state.walletsCreated = action.payload;
     },
@@ -83,7 +80,6 @@ export const {
   clearData,
   updateLoader,
   updateDraftWallet,
-  clearDraftWallet,
   updateWalletsCreated,
   addNewSignerToDraftWallet,
   updateWalletDraftTransactions,

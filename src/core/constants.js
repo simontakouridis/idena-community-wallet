@@ -54,7 +54,6 @@ export const actionNames = {
     clearData: generalSliceName + '/clearData',
     updateLoader: generalSliceName + '/updateLoader',
     updateDraftWallet: generalSliceName + '/updateDraftWallet',
-    clearDraftWallet: generalSliceName + '/clearDraftWallet',
     updateWalletsCreated: generalSliceName + '/updateWalletsCreated',
     addNewSignerToDraftWallet: generalSliceName + '/addNewSignerToDraftWallet',
     updateWalletDraftTransactions: generalSliceName + '/updateWalletDraftTransactions',

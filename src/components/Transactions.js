@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation } from 'react-router-dom';
 import { actionNames } from '../core/constants';
+import { truncateAddress } from '../core/utilities';
+import './Transactions.css';
 
 function Transactions() {
   const dispatch = useDispatch();
@@ -41,17 +43,62 @@ function Transactions() {
   }, [wallet, user]);
 
   return (
-    <div className={'Transactions'}>
+    <div className="Transactions">
       <h2>Transactions</h2>
       <div>
-        <b>Transactions:</b>
         {isWalletSigner && (
           <div>
             <Link to={`/wallet/${walletId}/create-transaction`}>Create Transaction</Link>
           </div>
         )}
       </div>
-      {JSON.stringify(walletTransactions)}
+      {walletTransactions.length &&
+        walletTransactions.map(transaction => (
+          <div key={transaction.id} className="transactionContainer">
+            <div>
+              <b>Id:</b> {transaction.id}
+            </div>
+            <div>
+              <b>Title:</b> {transaction.title}
+            </div>
+            <div>
+              <b>Category:</b> {transaction.category}
+            </div>
+            {transaction.category === 'fundProposal' && (
+              <div>
+                <b>Proposal Id:</b> {transaction.proposal}
+              </div>
+            )}
+            {transaction.category === 'other' && (
+              <div>
+                <b>Other Reason:</b> {transaction.categoryOtherDescription}
+              </div>
+            )}
+            <div>
+              <b>Recipient:</b> {transaction.recipient}
+            </div>
+            <div>
+              <b>Amount:</b> {transaction.amount} iDNA
+            </div>
+            <div>
+              <b>Signers:</b>{' '}
+              {transaction.sends.map((signer, index, arr) => (
+                <Link key={signer} to={`/delegates/${signer}`}>
+                  <span>
+                    {truncateAddress(signer)}
+                    {index !== arr.length - 1 && ', '}
+                  </span>
+                </Link>
+              ))}
+            </div>
+            <div>
+              <b>Executer:</b>{' '}
+              <Link to={`/delegates/${transaction.push}`}>
+                <span>{truncateAddress(transaction.push)}</span>
+              </Link>
+            </div>
+          </div>
+        ))}
     </div>
   );
 }

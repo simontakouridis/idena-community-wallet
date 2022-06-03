@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { isValidAddress } from 'ethereumjs-util';
 import { actionNames } from '../core/constants';
+import { doNotCloseReloadBrowser } from './commonComponents';
 import loadingSvg from './../assets/loading.svg';
+import './TransactionForm.css';
 
 const clearTransaction = {
   title: '',
@@ -59,7 +61,7 @@ function TransactionForm({ isWalletSigner, wallet }) {
   };
 
   return (
-    <div className={'TransactionForm'}>
+    <div className="TransactionForm">
       <div>
         <span>Title*:</span>
         <input value={newTransaction.title} onChange={e => setNewTransaction({ ...newTransaction, title: e.target.value })} placeholder="Transaction Title" />
@@ -115,6 +117,7 @@ function TransactionForm({ isWalletSigner, wallet }) {
       <button onClick={() => resetDraftTransaction()} disabled={!isWalletSigner || isCreatingTransaction || isDeletingTransaction}>
         Reset
       </button>
+      {isCreatingTransaction && doNotCloseReloadBrowser}
     </div>
   );
 }

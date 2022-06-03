@@ -13,7 +13,6 @@ import {
   rpcGetBalance,
   getLastEpoch,
   getTransaction,
-  getMultisigContract,
   postNewDraftWallet,
   postNewSigner,
   getDraftWallets,
@@ -163,7 +162,7 @@ function* deleteDraftWallet(action) {
     } = action;
     yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'deletingWallet', loading: true } });
     yield call(deleteWallet, draftWallet);
-    yield put({ type: actionNames[generalSliceName].clearDraftWallet });
+    location.reload();
   } catch (e) {
     console.error(e);
   } finally {
@@ -227,26 +226,9 @@ function* addingSignerToMultisigWallet(action) {
     if (!contract || method !== 'add' || !success) {
       throw new Error(`Something went wrong with adding signer. ${txReceipt?.errorMsg}`);
     }
-    const multisigContractData = yield call(getMultisigContract, contract);
-    if (!multisigContractData?.signers) {
-      throw new Error('Data inconsistency with new multisig contract');
-    }
-    const draftWallets = yield call(getDraftWallets, { address: contract });
-    if (draftWallets?.length !== 1 || draftWallets[0].signers?.length + 1 !== multisigContractData?.signers.length) {
-      throw new Error('Data inconsistency with draft wallet');
-    }
-    const remainingSigners = multisigContractData.signers.filter(signerA => !draftWallets[0].signers.find(signerB => signerB === signerA.address));
-    if (remainingSigners.length !== 1) {
-      throw new Error('More than one new signer detected');
-    }
 
-    const newSigner = remainingSigners[0].address;
     const newSignerLocal = localStorage.getItem('newSigner');
-    const newSignerLocalParsed = newSignerLocal && JSON.parse(newSignerLocal);
-    if (newSigner !== newSignerLocalParsed?.signer || contract !== newSignerLocalParsed?.contract) {
-      throw new Error('Data inconsistency with new signer');
-    }
-    yield call(postNewSigner, newSigner, contract);
+    yield call(postNewSigner, newSignerLocal, contract);
     window.location.href = `${appConfigurations.localBaseUrl}/create-wallet`;
   } catch (e) {
     console.error(e);
@@ -496,7 +478,7 @@ function* executingDraftTransactionSaga(action) {
       throw new Error(`Something went wrong with executing transaction. ${txReceipt?.errorMsg}`);
     }
 
-    yield call(executeDraftTransaction, draftTransaction.id);
+    yield call(executeDraftTransaction, draftTransaction.id, { tx });
     window.location.href = `${appConfigurations.localBaseUrl}/wallet/${wallet.id}/transactions`;
   } catch (e) {
     console.error(e);

@@ -4,14 +4,9 @@ import { Link, useLocation } from 'react-router-dom';
 import { actionNames } from './../core/constants';
 import { isValidAddress } from 'ethereumjs-util';
 import { truncateAddress } from './../core/utilities';
+import { doNotCloseReloadBrowser } from './commonComponents';
 import loadingSvg from './../assets/loading.svg';
 import './CreateWallet.css';
-
-const doNotCloseReloadBrowser = (
-  <span>
-    <b>DO NOT CLOSE OR RELOAD BROWSER!</b>
-  </span>
-);
 
 function CreateWallet() {
   const dispatch = useDispatch();
