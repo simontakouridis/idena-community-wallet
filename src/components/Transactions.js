@@ -74,8 +74,11 @@ function Transactions() {
                 <b>Other Reason:</b> {transaction.categoryOtherDescription}
               </div>
             )}
-            <div>
-              <b>Recipient:</b> {transaction.recipient}
+            <div style={{ wordBreak: 'break-all' }}>
+              <b>Recipient:</b>{' '}
+              <a href={`https://scan.idena.io/address/${transaction.recipient}`} target="_blank" rel="noreferrer">
+                {transaction.recipient}
+              </a>
             </div>
             <div>
               <b>Amount:</b> {transaction.amount} iDNA
@@ -96,6 +99,12 @@ function Transactions() {
               <Link to={`/delegates/${transaction.push}`}>
                 <span>{truncateAddress(transaction.push)}</span>
               </Link>
+            </div>
+            <div style={{ wordBreak: 'break-all' }}>
+              <b>Tx Hash:</b>{' '}
+              <a href={`https://scan.idena.io/transaction/${transaction.tx}`} target="_blank" rel="noreferrer">
+                {transaction.tx}
+              </a>
             </div>
           </div>
         ))}

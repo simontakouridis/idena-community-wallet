@@ -28,7 +28,8 @@ const generalSlice = createSlice({
     draftWallet: null,
     walletsCreated: [],
     walletDraftTransactions: {},
-    walletTransactions: {}
+    walletTransactions: {},
+    addressDetails: {}
   },
   reducers: {
     updateTokensSecured: (state, action) => {
@@ -67,6 +68,9 @@ const generalSlice = createSlice({
     },
     updateWalletTransactions: (state, action) => {
       state.walletTransactions[action.payload.walletId] = action.payload.walletTransactions;
+    },
+    updateAddressDetails: (state, action) => {
+      state.addressDetails[action.payload.address] = action.payload.details;
     }
   }
 });

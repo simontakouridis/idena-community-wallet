@@ -10,6 +10,7 @@ import {
   getWallets,
   getProposals,
   getTransactions,
+  getAddress,
   rpcGetBalance,
   getLastEpoch,
   getTransaction,
@@ -62,6 +63,7 @@ function* processlogout() {
     toast('Error logging out');
   } finally {
     yield put({ type: actionNames[generalSliceName].updateTokensSecured, payload: false });
+    window.location.href = `${appConfigurations.localBaseUrl}`;
   }
 }
 
@@ -83,10 +85,10 @@ function* refreshTokens() {
 function* getData() {
   try {
     const [users, wallets, proposals, transactions] = yield all([
-      call(getUsers, { role: 'admin' }),
-      call(getWallets),
-      call(getProposals),
-      call(getTransactions)
+      call(getUsers, { role: 'admin', limit: 10000 }),
+      call(getWallets, { limit: 10000, sortBy: 'round:desc' }),
+      call(getProposals, { limit: 10000, sortBy: 'createdAt:desc' }),
+      call(getTransactions, { limit: 10000, sortBy: 'createdAt:desc' })
     ]);
 
     if (!users) {
@@ -149,8 +151,8 @@ function* getUserWallets(action) {
     const {
       payload: { user }
     } = action;
-    const draftWallets = yield call(getDraftWallets, { author: user.address });
-    const walletsCreated = yield call(getWallets, { author: user.address });
+    const draftWallets = yield call(getDraftWallets, { author: user.address, limit: 10000 });
+    const walletsCreated = yield call(getWallets, { author: user.address, limit: 10000 });
 
     yield put({ type: actionNames[generalSliceName].updateDraftWallet, payload: draftWallets?.[0] });
     yield put({ type: actionNames[generalSliceName].updateWalletsCreated, payload: walletsCreated });
@@ -340,7 +342,7 @@ function* getWalletDraftTransactionsSaga(action) {
     const {
       payload: { walletId }
     } = action;
-    const walletDraftTransactionsData = yield call(getWalletDraftTransactions, { wallet: walletId });
+    const walletDraftTransactionsData = yield call(getWalletDraftTransactions, { wallet: walletId, limit: 10000 });
     const walletDraftTransaction = walletDraftTransactionsData?.[0];
     if (!walletDraftTransaction) {
       return;
@@ -358,7 +360,7 @@ function* getWalletTransactionsSaga(action) {
     const {
       payload: { walletId }
     } = action;
-    const walletTransactions = yield call(getWalletTransactions, { wallet: walletId });
+    const walletTransactions = yield call(getWalletTransactions, { wallet: walletId, limit: 10000, sortBy: 'createdAt:desc' });
 
     yield put({ type: actionNames[generalSliceName].updateWalletTransactions, payload: { walletId, walletTransactions } });
   } catch (e) {
@@ -508,6 +510,21 @@ function* deleteDraftTransactionSaga(action) {
   }
 }
 
+function* getAddressDetailsSaga(action) {
+  try {
+    const {
+      payload: { address }
+    } = action;
+    const addressData = yield call(getAddress, address);
+    if (addressData.error) {
+      throw new Error(`error getting address data: ${addressData.error}`);
+    }
+    yield put({ type: actionNames[generalSliceName].updateAddressDetails, payload: { address, details: addressData.result } });
+  } catch (e) {
+    console.error(e);
+  }
+}
+
 function* appRootSaga() {
   yield takeLatest(actionNames.processLogin, processLogin);
   yield takeLatest(actionNames.processlogout, processlogout);
@@ -531,6 +548,7 @@ function* appRootSaga() {
   yield takeLeading(actionNames.executeDraftTransaction, executeDraftTransactionSaga);
   yield takeLeading(actionNames.executingDraftTransaction, executingDraftTransactionSaga);
   yield takeLeading(actionNames.deleteDraftTransaction, deleteDraftTransactionSaga);
+  yield takeLeading(actionNames.getAddressDetails, getAddressDetailsSaga);
 }
 
 export default appRootSaga;

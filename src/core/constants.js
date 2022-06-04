@@ -45,6 +45,7 @@ export const actionNames = {
   deleteDraftTransaction: 'deleteDraftTransaction',
   executeDraftTransaction: 'executeDraftTransaction',
   executingDraftTransaction: 'executingDraftTransaction',
+  getAddressDetails: 'getAddressDetails',
   // General Slice
   [generalSliceName]: {
     updateTokensSecured: generalSliceName + '/updateTokensSecured',
@@ -57,6 +58,7 @@ export const actionNames = {
     updateWalletsCreated: generalSliceName + '/updateWalletsCreated',
     addNewSignerToDraftWallet: generalSliceName + '/addNewSignerToDraftWallet',
     updateWalletDraftTransactions: generalSliceName + '/updateWalletDraftTransactions',
-    updateWalletTransactions: generalSliceName + '/updateWalletTransactions'
+    updateWalletTransactions: generalSliceName + '/updateWalletTransactions',
+    updateAddressDetails: generalSliceName + '/updateAddressDetails'
   }
 };

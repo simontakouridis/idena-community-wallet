@@ -86,7 +86,7 @@ export function* getLastEpoch() {
 export function* getTransaction(tx) {
   const response = yield call(axios.get, `${appConfigurations.idenaApiUrl}/Transaction/${tx}`);
   if (response?.status !== 200 || (!response?.data?.result && !response?.data?.error)) {
-    throw new Error('Error getting address data');
+    throw new Error('Error getting transaction data');
   }
   return response.data;
 }
