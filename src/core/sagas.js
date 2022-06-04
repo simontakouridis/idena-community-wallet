@@ -30,8 +30,13 @@ import {
 } from './api';
 import { getAuthLocalStorage, setAuthLocalStorage, removeAuthLocalStorage } from './utilities';
 import { appConfigurations } from './../core/constants';
-import { getDeployMultisigPayload, getMultisigAddSignerPayload, getMultisigSendPayload, getMultisigPushPayload } from './../core/idenaUtilities';
-import { Transaction } from './idenaTransaction';
+import {
+  getDeployMultisigPayload,
+  getMultisigAddSignerPayload,
+  getMultisigSendPayload,
+  getMultisigPushPayload
+} from './../third-party/idena-contract-utilities/idenaUtilities';
+import { Transaction } from './../third-party/idena-contract-utilities/idenaTransaction';
 
 function* processLogin({ payload: idenaAuthToken }) {
   try {
