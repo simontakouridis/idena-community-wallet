@@ -1,6 +1,8 @@
 import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { actionNames } from '../core/constants';
 import { doNotCloseReloadBrowser } from './commonComponents';
+import { truncateAddress } from './../core/utilities';
 import loadingSvg from './../assets/loading.svg';
 import './DraftTransaction.css';
 
@@ -56,7 +58,18 @@ function DraftTransaction({ user, wallet, isWalletSigner, draftTransaction }) {
         <b>Amount:</b> {draftTransaction.amount} iDNA
       </div>
       <div>
-        <b>Signers:</b> {draftTransaction?.sends?.length ? draftTransaction.sends.join(', ') : <i>no signers</i>}
+        <b>Signers:</b>{' '}
+        {draftTransaction?.sends?.length ? (
+          draftTransaction.sends.map((signer, index, arr) => (
+            <Link key={signer} to={`/delegates/${signer}`}>
+              <span>
+                {truncateAddress(signer)} {index !== arr.length - 1 && ', '}
+              </span>
+            </Link>
+          ))
+        ) : (
+          <i>no signers</i>
+        )}
       </div>
       <div>
         <button
