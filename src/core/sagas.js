@@ -235,7 +235,8 @@ function* addingSignerToMultisigWallet(action) {
     }
 
     const newSignerLocal = localStorage.getItem('newSigner');
-    yield call(postNewSigner, newSignerLocal, contract);
+    const newSignerLocalParsed = JSON.parse(newSignerLocal);
+    yield call(postNewSigner, newSignerLocalParsed.signer, contract);
     window.location.href = `${appConfigurations.localBaseUrl}/create-wallet`;
   } catch (e) {
     console.error(e);
