@@ -48,7 +48,7 @@ function Transactions() {
       <div>
         {isWalletSigner && (
           <div>
-            <Link to={`/wallet/${walletId}/create-transaction`}>Create Transaction</Link>
+            <Link to={`/wallet/${walletId}/create-transaction`}>Create/Sign Transaction</Link>
           </div>
         )}
       </div>
