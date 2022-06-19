@@ -63,9 +63,11 @@ function Proposals() {
                     <b>Transactions:</b> {proposal.transactions.join(', ')}
                   </div>
                 )}
-                <div>
-                  <Link to={`/proposals/${proposal.id}/edit`}>EDIT PROPOSAL</Link>
-                </div>
+                {isCurrentDelegate && (
+                  <div>
+                    <Link to={`/proposals/${proposal.id}/edit`}>EDIT PROPOSAL</Link>
+                  </div>
+                )}
               </div>
             ))
           ) : (

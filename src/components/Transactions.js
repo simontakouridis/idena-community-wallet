@@ -54,7 +54,7 @@ function Transactions() {
       </div>
       {walletTransactions.length &&
         walletTransactions.map(transaction => (
-          <div key={transaction.id} className="transactionContainer">
+          <div key={transaction.id}>
             <div>
               <b>Id:</b> {transaction.id}
             </div>

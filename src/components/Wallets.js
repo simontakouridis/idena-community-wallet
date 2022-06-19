@@ -22,7 +22,7 @@ function Wallets() {
       <h2>Wallets</h2>
       {isAdmin() && (
         <>
-          <Link to="/create-wallet">CREATE WALLET</Link>
+          <Link to="/create-wallet">CREATE WALLET / ADD SIGNERS</Link>
         </>
       )}
       {wallets?.map(wallet => (
