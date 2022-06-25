@@ -12,6 +12,10 @@ import { appConfigurations } from './constants';
 
 const provider = IdenaProvider.create(appConfigurations.idenaRestrictedNodeUrl, appConfigurations.idenaRestrictedNodeKey);
 
+// create useless functions to bind this
+const buildTx = async data => provider.Blockchain.buildTx(data);
+const feePerGas = async () => provider.Blockchain.feePerGas();
+
 const sendTx = (tx, callbackUrl) => {
   const params = new URLSearchParams({
     tx: tx.toHex(),
@@ -23,7 +27,7 @@ const sendTx = (tx, callbackUrl) => {
 };
 
 export function* getFeePerGas() {
-  return yield call(provider.Blockchain.feePerGas);
+  return yield call(feePerGas);
 }
 
 export function* deploy(m, n, amount, sender) {
@@ -39,7 +43,7 @@ export function* deploy(m, n, amount, sender) {
   deployAttachment.setArgs(args);
 
   // build deploy tx through node (epoch, nonce will by filled automatically by node)
-  const tx = yield call(provider.Blockchain.buildTx, {
+  const tx = yield call(buildTx, {
     from: sender,
     type: TransactionType.DeployContractTx,
     amount,
@@ -53,7 +57,7 @@ export function* deploy(m, n, amount, sender) {
   tx.maxFee = calculateGasCost(feePerGas, tx.gas + deployGas);
 
   // construct callback url
-  const callbackUrl = `${appConfigurations.localBaseUrl}/creata-wallet/creating`;
+  const callbackUrl = `${appConfigurations.localBaseUrl}/create-wallet/creating`;
 
   sendTx(tx, callbackUrl);
 }
@@ -71,7 +75,7 @@ export function* add(contract, address, sender) {
     }
   ]);
 
-  const tx = yield call(provider.Blockchain.buildTx, {
+  const tx = yield call(buildTx, {
     from: sender,
     type: TransactionType.CallContractTx,
     to: contract,
@@ -108,7 +112,7 @@ export function* send(contract, destination, amount, sender, walletId) {
     }
   ]);
 
-  const tx = yield call(provider.Blockchain.buildTx, {
+  const tx = yield call(buildTx, {
     from: sender,
     type: TransactionType.CallContractTx,
     to: contract,
@@ -145,7 +149,7 @@ export function* push(contract, destination, amount, sender, walletId) {
     }
   ]);
 
-  const tx = yield call(provider.Blockchain.buildTx, {
+  const tx = yield call(buildTx, {
     from: sender,
     type: TransactionType.CallContractTx,
     to: contract,
@@ -177,7 +181,7 @@ export function* terminate(contract, author, sender) {
     }
   ]);
 
-  const tx = yield call(provider.Blockchain.buildTx, {
+  const tx = yield call(buildTx, {
     from: sender,
     type: TransactionType.CallContractTx,
     to: contract,
@@ -191,7 +195,7 @@ export function* terminate(contract, author, sender) {
   tx.maxFee = calculateGasCost(feePerGas, tx.gas + terminateGas);
 
   // construct callback url
-  const callbackUrl = `${appConfigurations.localBaseUrl}/creata-wallet`;
+  const callbackUrl = `${appConfigurations.localBaseUrl}/create-wallet`;
 
   sendTx(tx, callbackUrl);
 }
