@@ -61,8 +61,8 @@ function CreateWallet() {
   };
 
   const deleteDraftWallet = async () => {
-    if (window.confirm('Are you sure you want to delete this draft wallet?')) {
-      dispatch({ type: actionNames.deleteDraftWallet, payload: { draftWallet } });
+    if (window.confirm('Are you sure you want to delete this draft wallet? This action process will also terminate the multisig contract!')) {
+      dispatch({ type: actionNames.deleteDraftWallet, payload: { draftWallet, user } });
     }
   };
 

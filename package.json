@@ -33,6 +33,7 @@
     "fs-extra": "^10.0.0",
     "google-protobuf": "^3.20.1",
     "html-webpack-plugin": "^5.5.0",
+    "idena-sdk-js": "^0.0.11",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^27.4.3",
     "jest-resolve": "^27.4.2",

@@ -46,6 +46,7 @@ export const actionNames = {
   executeDraftTransaction: 'executeDraftTransaction',
   executingDraftTransaction: 'executingDraftTransaction',
   getAddressDetails: 'getAddressDetails',
+  terminateMultisigWallet: 'terminateMultisigWallet',
   // General Slice
   [generalSliceName]: {
     updateTokensSecured: generalSliceName + '/updateTokensSecured',

@@ -17,6 +17,12 @@ function Wallets() {
     dispatch({ type: actionNames.getAddressDetails, payload: { address } });
   };
 
+  const terminateMultisigWallet = wallet => {
+    if (window.confirm('Are you sure you want to terminate this multisig contract? Termination will fail if the multisig has funds.')) {
+      dispatch({ type: actionNames.terminateMultisigWallet, payload: { wallet, user } });
+    }
+  };
+
   return (
     <>
       <h2>Wallets</h2>
@@ -25,7 +31,7 @@ function Wallets() {
           <Link to="/create-wallet">CREATE WALLET / ADD SIGNERS</Link>
         </>
       )}
-      {wallets?.map(wallet => (
+      {wallets?.map((wallet, i) => (
         <div key={wallet.round}>
           <h3>Round {wallet.round}</h3>
           <div>
@@ -36,11 +42,11 @@ function Wallets() {
           </div>
           <div>
             <b>Signers:</b>{' '}
-            {wallet?.signers.map((signer, index, arr) => (
+            {wallet?.signers.map((signer, j, arr) => (
               <Link key={signer} to={`/delegates/${signer}`}>
                 <span>
                   {truncateAddress(signer)}
-                  {index !== arr.length - 1 && ', '}
+                  {j !== arr.length - 1 && ', '}
                 </span>
               </Link>
             ))}
@@ -52,6 +58,11 @@ function Wallets() {
             <b>Current Balance:</b> {addressDetails?.[wallet.address]?.balance ?? '#'} iDNA{' '}
             <button onClick={() => getContractDetails(wallet.address)}>Get Current Balance</button>
           </div>
+          {i !== 0 && wallet.author === user?.address && (
+            <div>
+              <button onClick={() => terminateMultisigWallet(wallet)}>Terminate Multisig</button>
+            </div>
+          )}
         </div>
       ))}
     </>
