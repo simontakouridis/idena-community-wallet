@@ -6,6 +6,7 @@ import {
   EmbeddedContractType,
   calculateGasCost,
   IdenaProvider,
+  TerminateContractAttachment,
   TransactionType
 } from 'idena-sdk-js';
 import { appConfigurations } from './constants';
@@ -165,11 +166,9 @@ export function* push(contract, destination, amount, sender, walletId) {
 }
 
 export function* terminate(contract, author, sender) {
-  const callAttachment = new CallContractAttachment({
-    method: 'terminate'
-  });
+  const terminateAttachment = new TerminateContractAttachment();
 
-  callAttachment.setArgs([
+  terminateAttachment.setArgs([
     {
       format: ContractArgumentFormat.Hex,
       index: 0,
@@ -179,9 +178,9 @@ export function* terminate(contract, author, sender) {
 
   const tx = yield call([provider, provider.Blockchain.buildTx], {
     from: sender,
-    type: TransactionType.CallContractTx,
+    type: TransactionType.TerminateContractTx,
     to: contract,
-    payload: callAttachment.toBytes()
+    payload: terminateAttachment.toBytes()
   });
 
   const feePerGas = yield call(getFeePerGas);
