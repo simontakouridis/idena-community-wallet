@@ -12,10 +12,6 @@ import { appConfigurations } from './constants';
 
 const provider = IdenaProvider.create(appConfigurations.idenaRestrictedNodeUrl, appConfigurations.idenaRestrictedNodeKey);
 
-// create useless functions to bind this
-const buildTx = async data => provider.Blockchain.buildTx(data);
-const feePerGas = async () => provider.Blockchain.feePerGas();
-
 const sendTx = (tx, callbackUrl) => {
   const params = new URLSearchParams({
     tx: tx.toHex(),
@@ -27,7 +23,7 @@ const sendTx = (tx, callbackUrl) => {
 };
 
 export function* getFeePerGas() {
-  return yield call(feePerGas);
+  return yield call([provider, provider.Blockchain.feePerGas]);
 }
 
 export function* deploy(m, n, amount, sender) {
@@ -43,7 +39,7 @@ export function* deploy(m, n, amount, sender) {
   deployAttachment.setArgs(args);
 
   // build deploy tx through node (epoch, nonce will by filled automatically by node)
-  const tx = yield call(buildTx, {
+  const tx = yield call([provider, provider.Blockchain.buildTx], {
     from: sender,
     type: TransactionType.DeployContractTx,
     amount,
@@ -75,7 +71,7 @@ export function* add(contract, address, sender) {
     }
   ]);
 
-  const tx = yield call(buildTx, {
+  const tx = yield call([provider, provider.Blockchain.buildTx], {
     from: sender,
     type: TransactionType.CallContractTx,
     to: contract,
@@ -112,7 +108,7 @@ export function* send(contract, destination, amount, sender, walletId) {
     }
   ]);
 
-  const tx = yield call(buildTx, {
+  const tx = yield call([provider, provider.Blockchain.buildTx], {
     from: sender,
     type: TransactionType.CallContractTx,
     to: contract,
@@ -149,7 +145,7 @@ export function* push(contract, destination, amount, sender, walletId) {
     }
   ]);
 
-  const tx = yield call(buildTx, {
+  const tx = yield call([provider, provider.Blockchain.buildTx], {
     from: sender,
     type: TransactionType.CallContractTx,
     to: contract,
@@ -181,7 +177,7 @@ export function* terminate(contract, author, sender) {
     }
   ]);
 
-  const tx = yield call(buildTx, {
+  const tx = yield call([provider, provider.Blockchain.buildTx], {
     from: sender,
     type: TransactionType.CallContractTx,
     to: contract,
