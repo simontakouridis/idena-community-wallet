@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
 import { isValidAddress } from 'ethereumjs-util';
 import { actionNames } from '../core/constants';
-import { doNotCloseReloadBrowser } from './commonComponents';
 import loadingSvg from './../assets/loading.svg';
 import './TransactionForm.css';
 
@@ -21,6 +21,13 @@ function TransactionForm({ isWalletSigner, wallet }) {
   const isDeletingTransaction = useSelector(state => state.general.loaders.deletingTransaction);
 
   const [newTransaction, setNewTransaction] = useState(clearTransaction);
+
+  useEffect(() => {
+    if (!isCreatingTransaction) {
+      return;
+    }
+    toast('DO NOT CLOSE OR RELOAD BROWSER!');
+  }, [isCreatingTransaction]);
 
   const createDraftTransaction = () => {
     if (!newTransaction.title) {
@@ -117,7 +124,6 @@ function TransactionForm({ isWalletSigner, wallet }) {
       <button onClick={() => resetDraftTransaction()} disabled={!isWalletSigner || isCreatingTransaction || isDeletingTransaction}>
         Reset
       </button>
-      {isCreatingTransaction && doNotCloseReloadBrowser}
     </div>
   );
 }

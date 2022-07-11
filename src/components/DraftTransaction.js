@@ -1,7 +1,8 @@
+import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { actionNames } from '../core/constants';
-import { doNotCloseReloadBrowser } from './commonComponents';
 import { truncateAddress } from './../core/utilities';
 import loadingSvg from './../assets/loading.svg';
 import './DraftTransaction.css';
@@ -11,6 +12,13 @@ function DraftTransaction({ user, wallet, isWalletSigner, draftTransaction }) {
   const isSigningTransaction = useSelector(state => state.general.loaders.signingTransaction);
   const isDeletingTransaction = useSelector(state => state.general.loaders.deletingTransaction);
   const isExecutingTransaction = useSelector(state => state.general.loaders.executingTransaction);
+
+  useEffect(() => {
+    if (!isSigningTransaction && !isExecutingTransaction) {
+      return;
+    }
+    toast('DO NOT CLOSE OR RELOAD BROWSER!');
+  }, [isSigningTransaction, isExecutingTransaction]);
 
   const signDraftTransaction = async () => {
     if (window.confirm('Are you sure you want to sign and approve this draft transaction?')) {
@@ -81,7 +89,6 @@ function DraftTransaction({ user, wallet, isWalletSigner, draftTransaction }) {
           {isSigningTransaction ? 'Signing Transaction...' : 'Sign Transaction'}
           {isSigningTransaction && <img className="loadingImg" src={loadingSvg} />}
         </button>
-        {isSigningTransaction && doNotCloseReloadBrowser}
       </div>
       <div>
         <button onClick={() => deleteDraftTransaction()} disabled={!isWalletSigner || isSigningTransaction || isDeletingTransaction || isExecutingTransaction}>
@@ -95,7 +102,6 @@ function DraftTransaction({ user, wallet, isWalletSigner, draftTransaction }) {
           {isExecutingTransaction ? 'Executing Transaction...' : 'Execute Transaction'}
           {isExecutingTransaction && <img className="loadingImg" src={loadingSvg} />}
         </button>
-        {isExecutingTransaction && doNotCloseReloadBrowser}
       </div>
     </div>
   );

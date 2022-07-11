@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { actionNames } from './../core/constants';
 import { isValidAddress } from 'ethereumjs-util';
 import { truncateAddress } from './../core/utilities';
-import { doNotCloseReloadBrowser } from './commonComponents';
 import loadingSvg from './../assets/loading.svg';
 import './CreateWallet.css';
 
@@ -52,6 +52,13 @@ function CreateWallet() {
     setIsCurrentDelegate(currentWallet.signers.includes(user.address));
   }, [currentWallet, user]);
 
+  useEffect(() => {
+    if (!isCreatingWallet && !isAddingSigner) {
+      return;
+    }
+    toast('DO NOT CLOSE OR RELOAD BROWSER!');
+  }, [isCreatingWallet, isAddingSigner]);
+
   const canCreateMultisig = () => {
     return (!currentWallet && users?.length === 1) || isCurrentDelegate;
   };
@@ -87,7 +94,6 @@ function CreateWallet() {
         {isCreatingWallet ? 'Creating Wallet...' : 'Create New Multisig Wallet'}
         {isCreatingWallet && <img className="loadingImg" src={loadingSvg} />}
       </button>
-      {isCreatingWallet && doNotCloseReloadBrowser}
       {draftWallet && (
         <div className="draftWalletContainer">
           <div>
@@ -129,7 +135,6 @@ function CreateWallet() {
               onChange={e => setSigner(e.target.value)}
               placeholder="New Signer Address"
             />
-            {isAddingSigner && doNotCloseReloadBrowser}
           </div>
           <div>
             <button onClick={() => deleteDraftWallet()} disabled={isAddingSigner || isDeletingWallet || isActivatingWallet}>

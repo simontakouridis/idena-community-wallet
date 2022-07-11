@@ -154,7 +154,7 @@ export function* push(contract, destination, amount, sender, walletId) {
   });
 
   const feePerGas = yield call(getFeePerGas);
-  const pushGas = 2500;
+  const pushGas = 5000;
 
   // calculate total TX cost
   tx.maxFee = calculateGasCost(feePerGas, tx.gas + pushGas);
