@@ -58,7 +58,7 @@ function Proposals() {
                 <div>
                   <b>Funding Status:</b> {proposal.fundingStatus}
                 </div>
-                {proposal.transactions.length && (
+                {!!proposal.transactions.length && (
                   <div>
                     <b>Transactions:</b> {proposal.transactions.join(', ')}
                   </div>

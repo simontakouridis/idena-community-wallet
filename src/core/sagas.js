@@ -349,7 +349,7 @@ function* createDraftTransactionSaga(action) {
       ...(newTransaction.category === 'other' && { categoryOtherDescription: newTransaction.otherDescription }),
       wallet: wallet.id,
       recipient: newTransaction.recipient,
-      amount: newTransaction.amount
+      amount: +parseFloat(newTransaction.amount).toFixed(8)
     });
     location.reload();
   } catch (e) {

@@ -37,7 +37,7 @@ function DelegateDetails() {
             <b>name:</b> {user.name}
           </div>
           <div>
-            <b>wallets:</b> {JSON.stringify(user.wallets)}
+            <b>wallets:</b> {user.wallets.join(', ')}
           </div>
         </>
       )}

@@ -55,8 +55,8 @@ function TransactionForm({ isWalletSigner, wallet }) {
       return;
     }
 
-    if (Number(newTransaction.amount) <= 0 || !Number.isInteger(Number(newTransaction.amount))) {
-      alert('Whole number greater than 0 is required!');
+    if (!Number.isNaN(newTransaction.amount) || Number(parseFloat(newTransaction.amount).toFixed(8)) <= 0) {
+      alert('Number greater than 0 is required!');
       return;
     }
 
