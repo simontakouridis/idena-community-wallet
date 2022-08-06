@@ -81,6 +81,7 @@ function TransactionForm({ isWalletSigner, wallet }) {
           <option value="fundProposal">Fund Proposal</option>
           <option value="setupNewWallet">Setup New Wallet</option>
           <option value="transferFundsToNewWallet">Transfer Funds To New Wallet</option>
+          <option value="delegateRewards">Delegate Rewards</option>
           <option value="other">Other</option>
         </select>
       </div>
