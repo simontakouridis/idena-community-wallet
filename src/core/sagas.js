@@ -439,6 +439,35 @@ function* executingDraftTransactionSaga(action) {
   }
 }
 
+function* manuallyExecuteDraftTransactionSaga(action) {
+  try {
+    const {
+      payload: { tx, wallet, draftTransaction }
+    } = action;
+
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'manuallyExecutingTransaction', loading: true } });
+
+    const transactionData = yield call(getTransaction, tx);
+    const txReceipt = transactionData?.result?.txReceipt;
+    const contract = txReceipt?.contractAddress.toLowerCase();
+    const method = txReceipt?.method;
+    const success = txReceipt?.success;
+
+    if (!contract || method !== 'push' || !success) {
+      throw new Error(`Something went wrong with manually executing transaction. ${txReceipt?.errorMsg}`);
+    }
+
+    yield call(executeDraftTransaction, draftTransaction.id, { tx });
+
+    window.location.href = `${appConfigurations.localBaseUrl}/wallet/${wallet.id}/transactions`;
+  } catch (e) {
+    console.error(e);
+    toast('Error executing manual transaction');
+  } finally {
+    yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'manuallyExecutingTransaction', loading: false } });
+  }
+}
+
 function* deleteDraftTransactionSaga(action) {
   try {
     const {
@@ -502,6 +531,7 @@ function* appRootSaga() {
   yield takeLeading(actionNames.signingDraftTransaction, signingDraftTransactionSaga);
   yield takeLeading(actionNames.executeDraftTransaction, executeDraftTransactionSaga);
   yield takeLeading(actionNames.executingDraftTransaction, executingDraftTransactionSaga);
+  yield takeLeading(actionNames.manuallyExecuteDraftTransaction, manuallyExecuteDraftTransactionSaga);
   yield takeLeading(actionNames.deleteDraftTransaction, deleteDraftTransactionSaga);
   yield takeLeading(actionNames.getAddressDetails, getAddressDetailsSaga);
   yield takeLeading(actionNames.terminateMultisigWallet, terminateMultisigWalletSaga);

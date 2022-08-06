@@ -23,7 +23,8 @@ const generalSlice = createSlice({
       creatingTransaction: false,
       signingTransaction: false,
       deletingTransaction: false,
-      executingTransaction: false
+      executingTransaction: false,
+      manuallyExecutingTransaction: false
     },
     draftWallet: null,
     walletsCreated: [],

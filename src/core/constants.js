@@ -45,6 +45,7 @@ export const actionNames = {
   deleteDraftTransaction: 'deleteDraftTransaction',
   executeDraftTransaction: 'executeDraftTransaction',
   executingDraftTransaction: 'executingDraftTransaction',
+  manuallyExecuteDraftTransaction: 'manuallyExecuteDraftTransaction',
   getAddressDetails: 'getAddressDetails',
   terminateMultisigWallet: 'terminateMultisigWallet',
   // General Slice

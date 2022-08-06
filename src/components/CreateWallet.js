@@ -63,23 +63,23 @@ function CreateWallet() {
     return (!currentWallet && users?.length === 1) || isCurrentDelegate;
   };
 
-  const createMultisigWallet = async () => {
+  const createMultisigWallet = () => {
     dispatch({ type: actionNames.createMultisigWallet, payload: { user } });
   };
 
-  const deleteDraftWallet = async () => {
+  const deleteDraftWallet = () => {
     if (window.confirm('Are you sure you want to delete this draft wallet? This action process will also terminate the multisig contract!')) {
       dispatch({ type: actionNames.deleteDraftWallet, payload: { draftWallet, user } });
     }
   };
 
-  const activateDraftWallet = async () => {
+  const activateDraftWallet = () => {
     if (window.confirm('Are you sure you want to activate this draft wallet? It will create also create a new round!')) {
       dispatch({ type: actionNames.activateDraftWallet, payload: { draftWallet } });
     }
   };
 
-  const addSignerToDraftWallet = async () => {
+  const addSignerToDraftWallet = () => {
     if (!isValidAddress(signer)) {
       alert('Not a valid address!');
       return;
