@@ -44,7 +44,7 @@ function Proposals() {
           <h3>Round {wallet.round}</h3>
           {proposalsGrouped[wallet.id] ? (
             proposalsGrouped[wallet.id].map(proposal => (
-              <div key={proposal.id}>
+              <div key={proposal.id} style={{ marginBottom: 15 }}>
                 <div>
                   <b>{proposal.title}</b>
                 </div>
