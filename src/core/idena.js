@@ -5,6 +5,7 @@ import {
   DeployContractAttachment,
   EmbeddedContractType,
   calculateGasCost,
+  dnaToFloatString,
   IdenaProvider,
   TerminateContractAttachment,
   TransactionType
@@ -27,7 +28,7 @@ export function* getFeePerGas() {
   return yield call([provider, provider.Blockchain.feePerGas]);
 }
 
-export function* deploy(m, n, amount, sender) {
+export function* deploy(m, n, sender) {
   const deployAttachment = new DeployContractAttachment({
     codeHash: EmbeddedContractType.MultisigContract
   });
@@ -39,16 +40,17 @@ export function* deploy(m, n, amount, sender) {
 
   deployAttachment.setArgs(args);
 
+  const feePerGas = yield call(getFeePerGas);
+  const amountGas = 3000000;
+  const deployGas = 1300;
+
   // build deploy tx through node (epoch, nonce will by filled automatically by node)
   const tx = yield call([provider, provider.Blockchain.buildTx], {
     from: sender,
     type: TransactionType.DeployContractTx,
-    amount,
+    amount: Math.ceil(dnaToFloatString(calculateGasCost(feePerGas, amountGas))),
     payload: deployAttachment.toBytes()
   });
-
-  const feePerGas = yield call(getFeePerGas);
-  const deployGas = 1300;
 
   // calculate total TX cost
   tx.maxFee = calculateGasCost(feePerGas, tx.gas + deployGas);

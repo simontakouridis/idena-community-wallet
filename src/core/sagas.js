@@ -98,7 +98,7 @@ function* createMultisigWallet(action) {
       payload: { user }
     } = action;
     yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'creatingWallet', loading: true } });
-    yield call(deploy, 3, 5, 16, user.address);
+    yield call(deploy, 3, 5, user.address);
   } catch (e) {
     console.error(e);
     yield put({ type: actionNames[generalSliceName].updateLoader, payload: { loader: 'creatingWallet', loading: false } });
